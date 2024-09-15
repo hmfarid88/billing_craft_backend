@@ -10,14 +10,15 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserInfo {
+@AllArgsConstructor
+public class ShopInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String username;
+    private String shopName;
+    private String phoneNumber;
+    private String address;
     private String email;
-    private String password;
-    private String roles;
+    private String username;
 }

@@ -1,7 +1,5 @@
 package com.iyadsoft.billing_craft_backend.controller;
 
-
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,7 +10,6 @@ import com.iyadsoft.billing_craft_backend.repository.CustomerRepository;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:8080")
 public class CustomerController {
     private final CustomerRepository customerReository;
 

@@ -1,5 +1,7 @@
 package com.iyadsoft.billing_craft_backend.entity;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,14 +12,16 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserInfo {
+@AllArgsConstructor
+public class SupplierPayment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
+    private LocalDate date;
+    private String supplierName;
+    private String paymentType;
+    private String note;
+    private Double amount;
     private String username;
-    private String email;
-    private String password;
-    private String roles;
 }

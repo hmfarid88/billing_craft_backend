@@ -1,6 +1,6 @@
 package com.iyadsoft.billing_craft_backend.dto;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class CustomerProductSaleDTO {
     private Integer sprice;
     private Integer discount;
     private Integer offer;
-    private Timestamp saleDate;
+    private LocalDate saleDate;
     private String cid;
     private Long proId;
     private String username;

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,11 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO;
 import com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO;
+import com.iyadsoft.billing_craft_backend.entity.BrandName;
+import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductName;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 import com.iyadsoft.billing_craft_backend.entity.SupplierName;
+import com.iyadsoft.billing_craft_backend.repository.BrandNameRepository;
+import com.iyadsoft.billing_craft_backend.repository.CategoryNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.ColorNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductStockRepository;
@@ -31,13 +34,14 @@ import com.iyadsoft.billing_craft_backend.service.ProductSaleService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:8080")
 public class ProductController {
     private final ProductStockRepository productRepository;
     private final ProductNameRepository productNameRepository;
     private final ColorNameRepository colorNameRepository;
     private final SupplierNameRepository supplierNameRepository;
     private final ProductSaleRepository productSaleRepository;
+    private final CategoryNameRepository categoryNameRepository;
+    private final BrandNameRepository brandNameRepository;
 
     @Autowired
     private ProductSaleService productSaleService;
@@ -45,12 +49,15 @@ public class ProductController {
     @Autowired
     ProductController(ProductStockRepository productRepository, ProductNameRepository productNameRepository,
             ColorNameRepository colorNameRepository, SupplierNameRepository supplierNameRepository,
-            ProductSaleRepository productSaleRepository) {
+            ProductSaleRepository productSaleRepository, CategoryNameRepository categoryNameRepository,
+            BrandNameRepository brandNameRepository) {
         this.productRepository = productRepository;
         this.productNameRepository = productNameRepository;
         this.colorNameRepository = colorNameRepository;
         this.supplierNameRepository = supplierNameRepository;
         this.productSaleRepository = productSaleRepository;
+        this.categoryNameRepository = categoryNameRepository;
+        this.brandNameRepository = brandNameRepository;
 
     }
 
@@ -58,6 +65,8 @@ public class ProductController {
     List<ProductStock> newProducts(@RequestBody List<ProductStock> newProducts) {
         for (ProductStock product : newProducts) {
             if (productRepository.existsByproductno(product.getProductno())) {
+                // return ResponseEntity.status(HttpStatus.CONFLICT).body("Sorry, this product
+                // is already exists!");
                 throw new DuplicateEntityException("Product number " + product.getProductno() + " is already exists !");
             }
         }
@@ -82,6 +91,28 @@ public class ProductController {
     // productSale) {
     // return productSaleRepository.saveAll(productSale);
     // }
+
+    @PostMapping("/addNewCategory")
+    public ResponseEntity<?> saveCategory(@RequestBody CategoryName categoryName) {
+        if (categoryNameRepository.existsByUsernameAndCategoryItem(categoryName.getUsername(),
+                categoryName.getCategoryItem())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Sorry, this category is already exists!");
+
+        }
+        CategoryName savedCategory = categoryNameRepository.save(categoryName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    }
+
+    @PostMapping("/addNewBrand")
+    public ResponseEntity<?> saveBrand(@RequestBody BrandName brandName) {
+        if (brandNameRepository.existsByUsernameAndBrandItem(brandName.getUsername(),
+                brandName.getBrandItem())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Sorry, this brand is already exists!");
+
+        }
+        BrandName savedBrand = brandNameRepository.save(brandName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedBrand);
+    }
 
     @PostMapping("/addNewProduct")
     public ResponseEntity<ProductName> saveProduct(@RequestBody ProductName productName) {
@@ -115,6 +146,16 @@ public class ProductController {
         supplierNameRepository.save(supplierName);
         return ResponseEntity.ok("Supplier Added Successfully");
         // return ResponseEntity.status(HttpStatus.CREATED).body(savedSupplier);
+    }
+
+    @GetMapping("/getCategoryItem")
+    public List<CategoryName> getCategoryItemByUsername(@RequestParam String username) {
+        return categoryNameRepository.getCategoryItemByUsername(username);
+    }
+
+    @GetMapping("/getBrandItem")
+    public List<BrandName> getBrandItemByUsername(@RequestParam String username) {
+        return brandNameRepository.getBrandItemByUsername(username);
     }
 
     @GetMapping("/getProductItem")

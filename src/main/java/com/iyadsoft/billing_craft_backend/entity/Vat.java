@@ -1,7 +1,5 @@
 package com.iyadsoft.billing_craft_backend.entity;
 
-import java.time.LocalDate;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,14 +12,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentRecord {
+public class Vat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private LocalDate date;
-    private String paymentName;
-    private String paymentType;
-    private String paymentNote;
-    private Double amount;
+    private int id;
+    private Double percent;
     private String username;
 }

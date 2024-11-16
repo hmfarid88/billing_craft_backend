@@ -1,5 +1,7 @@
 package com.iyadsoft.billing_craft_backend.entity;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -25,13 +27,14 @@ public class ProductStock {
     private String category;
     private String brand;
     private String productName;
-    private int pprice;
-    private int sprice;
+    private Double pprice;
+    private Double sprice;
     private String color;
     private String supplier;
     private String supplierInvoice;
     private String productno;
-    private String receiveDate;
+    private LocalDate date;
+    private LocalTime time;
 
    @OneToMany(mappedBy = "productStock", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProductSale> productSale;

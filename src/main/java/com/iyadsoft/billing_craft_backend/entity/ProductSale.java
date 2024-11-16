@@ -2,6 +2,7 @@ package com.iyadsoft.billing_craft_backend.entity;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,9 +24,10 @@ public class ProductSale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long saleId;
     private String saleType;
-    private int discount;
-    private int offer;
-    private LocalDate saleDate;
+    private Double discount;
+    private Double offer;
+    private LocalDate date;
+    private LocalTime time;
     private String username;
 
     @ManyToOne(fetch = FetchType.LAZY)

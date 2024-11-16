@@ -14,14 +14,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentRecord {
+public class ProfitWithdraw {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    private String paymentName;
-    private String paymentType;
-    private String paymentNote;
+    private int year;
+    private int month;
+    private String note;
     private Double amount;
     private String username;
 }

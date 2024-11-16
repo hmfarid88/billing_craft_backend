@@ -9,7 +9,7 @@ import com.iyadsoft.billing_craft_backend.entity.Customer;
 import com.iyadsoft.billing_craft_backend.repository.CustomerRepository;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/customer")
 public class CustomerController {
     private final CustomerRepository customerReository;
 

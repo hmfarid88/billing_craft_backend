@@ -21,9 +21,9 @@ public class Customer {
     private String cName;
     private String phoneNumber;
     private String address;
-    private int cardPay;
-    private int dueAmount;
-    private int vatAmount;
+    private Double cardPay;
+    private Double vatAmount;
+    private Double received;
     private String username;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

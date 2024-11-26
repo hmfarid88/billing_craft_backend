@@ -53,6 +53,7 @@ public class ProductSaleService {
             productSale.setCustomer(savedCustomer); // Associate with saved customer
             productSale.setProductStock(productStock); // Associate with product stock
             productSale.setSaleType(salesItemDTO.getSaleType());
+            productSale.setSprice(salesItemDTO.getSprice());
             productSale.setDiscount(salesItemDTO.getDiscount());
             productSale.setOffer(salesItemDTO.getOffer());
             productSale.setDate(salesItemDTO.getDate());

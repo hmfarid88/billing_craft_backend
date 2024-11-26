@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.iyadsoft.billing_craft_backend.entity.Vat;
 import com.iyadsoft.billing_craft_backend.repository.VatRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class VatService {

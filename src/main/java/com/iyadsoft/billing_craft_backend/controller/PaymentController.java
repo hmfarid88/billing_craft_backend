@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iyadsoft.billing_craft_backend.dto.PayRecevBalance;
+import com.iyadsoft.billing_craft_backend.dto.PayRecevDetails;
+import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
+import com.iyadsoft.billing_craft_backend.dto.SupplierSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.Expense;
 import com.iyadsoft.billing_craft_backend.entity.PaymentName;
 import com.iyadsoft.billing_craft_backend.entity.PaymentRecord;
@@ -23,6 +27,7 @@ import com.iyadsoft.billing_craft_backend.repository.PaymentNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.PaymentRecordRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProfitWithdrawRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierPaymentRepository;
+import com.iyadsoft.billing_craft_backend.service.SupplierBalanceService;
 
 @RestController
 @RequestMapping("/payment")
@@ -41,6 +46,9 @@ public class PaymentController {
 
     @Autowired
     private ProfitWithdrawRepository profitWithdrawRepository;
+
+    @Autowired
+    private SupplierBalanceService supplierBalanceService;
 
     @PostMapping("/addPaymentName")
     public ResponseEntity<?> addPaymentName(@RequestBody PaymentName paymentName) {
@@ -77,12 +85,34 @@ public class PaymentController {
         return paymentNameRepository.getPaymentPersonByUsername(username);
     }
 
+    @GetMapping("/getPaymentRecord")
+    public List<PayRecevBalance> getPaymentRecordByUsername(@RequestParam String username) {
+        return paymentRecordRepository.findPayRecevSummaryBalances(username);
+    }
+
+    @GetMapping("/getPaymentRecord-details")
+    public List<PayRecevDetails> getPaymentRecordDetailsByUsername(@RequestParam String username, @RequestParam String paymentName) {
+        return paymentRecordRepository.findDatePaymentReceiveAndNoteByUserAndPaymentName(username, paymentName);
+    }
+
+    @GetMapping("/getSupplierBalance")
+    public List<SupplierSummaryDTO> getSupplierRecordByUsername(@RequestParam String username) {
+        return supplierBalanceService.getSupplierData(username);
+    }
+
+    @GetMapping("/getSupplierBalance-details")
+    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username, @RequestParam String supplierName) {
+        return supplierBalanceService.getSupplierDetails(username, supplierName);
+    }
+
     @GetMapping("/getMonthlyExpense")
     public List<Expense> getMonthlyExpenseByUsername(@RequestParam String username) {
         return expenseRepository.findExpenseForCurrentMonth(username);
     }
+
     @GetMapping("/getDatewiseExpense")
-    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
         return expenseRepository.findExpenseForDatewise(username, startDate, endDate);
     }
 }

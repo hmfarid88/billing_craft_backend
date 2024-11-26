@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO;
 import com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
+import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
 import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
@@ -179,6 +180,11 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
         return productRepository.getProductsStockByUsername(username);
     }
 
+    @GetMapping("/getUpdateableProductStock")
+    public List<UpdateableStock> getProductsStockByUsernameAndSupplier(@RequestParam String username) {
+        return productRepository.getProductsStockByUsernameAndSupplier(username);
+    }
+
     @GetMapping("/getSingleProduct")
     public Optional<ProductStock> getSingleProduct(@RequestParam Long proId) {
         return productRepository.findById(proId);
@@ -231,4 +237,32 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
     public Optional<Double> getPercentByUsername(@RequestParam String username) {
         return vatService.getPercentByUsername(username);
     }
+
+    @PostMapping("/update-pricedrop")
+    public ResponseEntity<String> updateProductPrice(
+            @RequestParam String username,
+            @RequestParam String supplier,
+            @RequestParam String productName,
+            @RequestParam String save,
+            @RequestParam Double pprice,
+            @RequestParam Double newPprice,
+            @RequestParam Double newSprice) {
+
+        productStockService.handlePriceDrop(username, supplier, productName, save, pprice, newPprice, newSprice);
+        return ResponseEntity.ok("Price updated successfully!");
+    }
+
+    @PostMapping("/update-priceup")
+    public ResponseEntity<String> updateProductPriceup(
+            @RequestParam String username,
+            @RequestParam String supplier,
+            @RequestParam String productName,
+            @RequestParam Double pprice,
+            @RequestParam Double newSprice) {
+
+        productStockService.handlePriceUp(username, supplier, productName, pprice, newSprice);
+        return ResponseEntity.ok("Price updated successfully!");
+    }
+
+   
 }

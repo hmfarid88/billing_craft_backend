@@ -1,6 +1,5 @@
 package com.iyadsoft.billing_craft_backend.entity;
 
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -24,6 +23,7 @@ public class ProductSale {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long saleId;
     private String saleType;
+    private Double sprice;
     private Double discount;
     private Double offer;
     private LocalDate date;

@@ -19,6 +19,7 @@ public class CustomerProductSaleDTO {
     private String productName;
     private String productno;
     private String color;
+    private Double pprice;
     private Double sprice;
     private Double discount;
     private Double offer;

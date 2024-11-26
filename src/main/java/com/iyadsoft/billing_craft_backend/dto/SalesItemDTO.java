@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class SalesItemDTO {
     private Long proId;
+    private Double sprice;
     private Double discount;
     private Double offer;
     private LocalDate date;

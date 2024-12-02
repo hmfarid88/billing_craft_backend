@@ -2,6 +2,7 @@ package com.iyadsoft.billing_craft_backend.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -73,5 +74,42 @@ public class ProductStockService {
         LocalDate today = LocalDate.now();
         return productStockRepository.countProductByUsernameGroupByCategoryBrandProductName(username, today);
     }
+    
+    public List<Pricedrop> getPricedropsByUsername(String username) {
+        return pricedropRepository.findByUsername(username);
+    }
 
+    public List<ProductStock> getProductsNotInSalesStock(String username, String productno) {
+        return productStockRepository.findProductsNotInSalesStock(username, productno);
+    }
+
+    public ProductStock updateProductStock(Long proId, ProductStock updatedProduct) {
+        Optional<ProductStock> existingProductOpt = productStockRepository.findById(proId);
+
+        if (existingProductOpt.isPresent()) {
+            ProductStock existingProduct = existingProductOpt.get();
+            
+            // Update fields
+            // existingProduct.setUsername(updatedProduct.getUsername());
+            existingProduct.setCategory(updatedProduct.getCategory());
+            existingProduct.setBrand(updatedProduct.getBrand());
+            existingProduct.setProductName(updatedProduct.getProductName());
+            existingProduct.setPprice(updatedProduct.getPprice());
+            existingProduct.setSprice(updatedProduct.getSprice());
+            existingProduct.setColor(updatedProduct.getColor());
+            existingProduct.setSupplier(updatedProduct.getSupplier());
+            existingProduct.setSupplierInvoice(updatedProduct.getSupplierInvoice());
+            existingProduct.setProductno(updatedProduct.getProductno());
+            existingProduct.setDate(updatedProduct.getDate());
+            // existingProduct.setTime(updatedProduct.getTime());
+
+            // Save the updated product
+            return productStockRepository.save(existingProduct);
+        } else {
+            throw new RuntimeException("Product with proId " + proId + " not found.");
+        }
+       
+    }
+
+      
 }

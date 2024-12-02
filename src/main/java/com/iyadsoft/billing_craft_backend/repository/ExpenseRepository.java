@@ -20,5 +20,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT e FROM Expense e WHERE e.username = :username AND e.date BETWEEN :startDate AND :endDate")
     List<Expense> findExpenseForDatewise(@Param("username") String username, @Param("startDate")LocalDate startDate, @Param ("endDate") LocalDate endDate);
+    
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.username = :username AND YEAR(e.date) = :year AND MONTH(e.date) = :month")
+    Double findSelectedMonthSum(@Param("username") String username, @Param("year") int year, @Param("month") int month);
 
+    @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.username = :username AND e.date BETWEEN :startDate AND :endDate")
+    Double findDatewiseMonthSum(@Param("username") String username, LocalDate startDate, LocalDate endDate);
 }

@@ -111,8 +111,17 @@ public class PaymentController {
     }
 
     @GetMapping("/getDatewiseExpense")
-    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate,
-            LocalDate endDate) {
+    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
         return expenseRepository.findExpenseForDatewise(username, startDate, endDate);
+    }
+
+    @GetMapping("/getSelectedSum")
+    public Double getSelectedExpenseByUsername(@RequestParam String username, int year, int month) {
+        return expenseRepository.findSelectedMonthSum(username, year, month);
+    }
+
+    @GetMapping("/getDatewiseExpenseSum")
+    public Double getDatewiseExpenseSumByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+        return expenseRepository.findDatewiseMonthSum(username, startDate, endDate);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
@@ -18,6 +19,12 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
 
       @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL")
       List<ProductStock> getProductsStockByUsername(String username);
+
+      @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND MONTH(ps.date) = MONTH(CURRENT_DATE) AND YEAR(ps.date) = YEAR(CURRENT_DATE)")
+      List<ProductEntryDto> getProductsStockByUsernameForCurrentMonth(@Param("username") String username);
+
+      @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND ps.date BETWEEN :startDate AND :endDate")
+      List<ProductEntryDto> getDatewiseProductsStockByUsername(String username, LocalDate startDate, LocalDate endDate);
 
       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.UpdateableStock(ps.supplier, ps.productName, ps.pprice, COUNT(ps.productno)) FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL GROUP BY ps.supplier, ps.productName, ps.pprice")
       List<UpdateableStock> getProductsStockByUsernameAndSupplier(String username);
@@ -62,4 +69,7 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
 
       @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND ps.supplier=:supplier AND ps.productName=:productName AND ps.pprice=:pprice AND psale IS NULL")
       List<ProductStock> findByUsernameAndSupplierAndProductNameAndPprice(String username, String supplier, String productName, Double pprice);
+
+      @Query("SELECT ps FROM ProductStock ps WHERE ps.username = :username AND ps.productno = :productno AND ps.proId NOT IN (SELECT DISTINCT ps.proId FROM ProductSale psale JOIN psale.productStock ps)")
+      List<ProductStock> findProductsNotInSalesStock(@Param("username") String username, @Param("productno") String productno);
 }

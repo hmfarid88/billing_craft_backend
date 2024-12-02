@@ -29,6 +29,21 @@ public class CashbookController {
         return paymentRecordRepository.findNetSumAmountBeforeToday(username, date);
     }
 
+    @GetMapping("/net-cash-today")
+    public Double getNetCashToday(@RequestParam String username) {
+        return paymentRecordRepository.findCashToday(username);
+    }
+
+    @GetMapping("/allPaymentSum")
+    public Double getAllPayment(@RequestParam String username) {
+        return paymentRecordRepository.findAllPaymentSum(username);
+    }
+
+    @GetMapping("/allReceiveSum")
+    public Double getAllReceive(@RequestParam String username) {
+        return paymentRecordRepository.findAllReceiveSum(username);
+    }
+
     @GetMapping("/payments/today")
     public List<PaymentDto> getPaymentsForToday(@RequestParam String username, LocalDate date) {
         return cashBookService.getPaymentsForToday(username, date);
@@ -39,8 +54,8 @@ public class CashbookController {
         return cashBookService.getReceivesForToday(username, date);
     }
 
-     @GetMapping("/sales/customer")
+    @GetMapping("/sales/customer")
     public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username, @RequestParam LocalDate date) {
-           return cashBookService.getCustomerSalesDetails(username, date);
+        return cashBookService.getCustomerSalesDetails(username, date);
     }
 }

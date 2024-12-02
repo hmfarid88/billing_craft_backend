@@ -10,7 +10,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,11 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO;
 import com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO;
+import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
+import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
 import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
+import com.iyadsoft.billing_craft_backend.entity.Pricedrop;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductName;
 import com.iyadsoft.billing_craft_backend.entity.SupplierName;
@@ -51,9 +56,7 @@ public class ProductController {
     private final ProductSaleRepository productSaleRepository;
     private final CategoryNameRepository categoryNameRepository;
     private final BrandNameRepository brandNameRepository;
-    
 
-   
     @Autowired
     private ProductStockService productStockService;
 
@@ -72,28 +75,27 @@ public class ProductController {
         this.productSaleRepository = productSaleRepository;
         this.categoryNameRepository = categoryNameRepository;
         this.brandNameRepository = brandNameRepository;
-       
+
     }
 
+    @PostMapping("/addProducts")
+    @Transactional
+    public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductStock> newProducts) {
+        List<ProductStock> savedProducts = new ArrayList<>();
+        ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
 
-@PostMapping("/addProducts")
-@Transactional
-public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductStock> newProducts) {
-    List<ProductStock> savedProducts = new ArrayList<>();
-    ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
-
-    for (ProductStock product : newProducts) {
-        if (productRepository.existsByUsernameAndProductno(product.getUsername(), product.getProductno())) {
-            throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
+        for (ProductStock product : newProducts) {
+            if (productRepository.existsByUsernameAndProductno(product.getUsername(), product.getProductno())) {
+                throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
+            }
+            product.setTime(dhakaTime.toLocalTime());
+            savedProducts.add(product);
         }
-        product.setTime(dhakaTime.toLocalTime());
-        savedProducts.add(product);
+
+        savedProducts = productRepository.saveAll(savedProducts);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
     }
-    
-    savedProducts = productRepository.saveAll(savedProducts);
-    return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
-}
- 
+
     @PostMapping("/addNewCategory")
     public ResponseEntity<?> saveCategory(@RequestBody CategoryName categoryName) {
         if (categoryNameRepository.existsByUsernameAndCategoryItem(categoryName.getUsername(),
@@ -180,6 +182,17 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
         return productRepository.getProductsStockByUsername(username);
     }
 
+    @GetMapping("/getMonthlyProductEntry")
+    public List<ProductEntryDto> getProductsStockByUsernameForCurrentMonth(@RequestParam String username) {
+        return productRepository.getProductsStockByUsernameForCurrentMonth(username);
+    }
+
+    @GetMapping("/getDatewiseProductEntry")
+    public List<ProductEntryDto> getDatewiseProductsStockByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
+        return productRepository.getDatewiseProductsStockByUsername(username, startDate, endDate);
+    }
+
     @GetMapping("/getUpdateableProductStock")
     public List<UpdateableStock> getProductsStockByUsernameAndSupplier(@RequestParam String username) {
         return productRepository.getProductsStockByUsernameAndSupplier(username);
@@ -195,6 +208,22 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
         return productSaleRepository.getProductsSaleByUsername(username);
     }
 
+    @GetMapping("/getProfitSale")
+    public List<ProfitItemDto> getProfitSaleByUsername(@RequestParam String username) {
+        return productSaleRepository.getProfitSaleByUsernameForCurrentMonth(username);
+    }
+
+    @GetMapping("/getSelectedProfitSale")
+    public List<ProfitItemDto> getSelectedProfitSaleByUsername(@RequestParam String username, int year, int month) {
+        return productSaleRepository.getSelectedProfitSaleByUsername(username, year, month);
+    }
+
+    @GetMapping("/getDatewiseProfitSale")
+    public List<ProfitItemDto> getDatewiseProfitSaleByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
+        return productSaleRepository.getDatewiseProfitSaleByUsername(username, startDate, endDate);
+    }
+
     @GetMapping("/getMonthlyProductSale")
     public List<CustomerProductSaleDTO> getMonthlyProductsSaleByUsername(@RequestParam String username) {
         return productSaleRepository.getProductsSaleByUsernameForCurrentMonth(username);
@@ -206,12 +235,14 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
     }
 
     @GetMapping("/getDatewiseProductSale")
-    public List<CustomerProductSaleDTO> getDatewiseProductsSaleByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+    public List<CustomerProductSaleDTO> getDatewiseProductsSaleByUsername(@RequestParam String username,
+            LocalDate startDate, LocalDate endDate) {
         return productSaleRepository.getProductsSaleByUsernameDatewise(username, startDate, endDate);
     }
 
     @GetMapping("/getDatewiseVendorSale")
-    public List<CustomerProductSaleDTO> getDatewiseVendorSaleByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+    public List<CustomerProductSaleDTO> getDatewiseVendorSaleByUsername(@RequestParam String username,
+            LocalDate startDate, LocalDate endDate) {
         return productSaleRepository.getVendorSaleByUsernameDatewise(username, startDate, endDate);
     }
 
@@ -220,14 +251,12 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
         return productSaleRepository.getInvoiceDataByUsername(username, cid);
     }
 
-   
     @GetMapping("/productStockSummary")
     public ResponseEntity<List<ProductStockCountDTO>> getProductCountByCategoryBrand(@RequestParam String username) {
         List<ProductStockCountDTO> productCounts = productStockService.getProductCountByUserAndGroup(username);
         return ResponseEntity.ok(productCounts);
     }
 
-    
     @PutMapping("/vatEntry")
     public Vat saveOrUpdateVat(@RequestBody Vat vat) {
         return vatService.saveOrUpdateVat(vat);
@@ -264,5 +293,73 @@ public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductS
         return ResponseEntity.ok("Price updated successfully!");
     }
 
-   
+    @GetMapping("/pricedrop-list")
+    public List<Pricedrop> getPricedropsByUsername(@RequestParam String username) {
+        return productStockService.getPricedropsByUsername(username);
+    }
+
+    @GetMapping("/products/not-in-sales")
+    public List<ProductStock> getProductsNotInSalesStock(@RequestParam String username,
+            @RequestParam String productno) {
+        return productStockService.getProductsNotInSalesStock(username, productno);
+    }
+
+    @PutMapping("/products/update/{proId}")
+    public ResponseEntity<?> updateProductStock(
+            @PathVariable Long proId,
+            @RequestBody ProductStock updatedProduct) {
+        try {
+            ProductStock productStock = productStockService.updateProductStock(proId, updatedProduct);
+            return ResponseEntity.ok(productStock);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Product with ID " + proId + " not found.");
+        }
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteCategory")
+    public ResponseEntity<String> deleteCategory(
+            @RequestParam String username,
+            @RequestParam String categoryItem) {
+        categoryNameRepository.deleteByUsernameAndCategoryItem(username, categoryItem);
+        return ResponseEntity.ok("Category deleted successfully.");
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteBrand")
+    public ResponseEntity<String> deleteBrand(
+            @RequestParam String username,
+            @RequestParam String brandItem) {
+        brandNameRepository.deleteByUsernameAndBrandItem(username, brandItem);
+        return ResponseEntity.ok("Brand deleted successfully.");
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteSupplier")
+    public ResponseEntity<String> deleteSupplier(
+            @RequestParam String username,
+            @RequestParam String supplierItem) {
+        supplierNameRepository.deleteByUsernameAndSupplierItem(username, supplierItem);
+        return ResponseEntity.ok("Supplier deleted successfully.");
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteProduct")
+    public ResponseEntity<String> deleteProduct(
+            @RequestParam String username,
+            @RequestParam String productItem) {
+        productNameRepository.deleteByUsernameAndProductItem(username, productItem);
+        return ResponseEntity.ok("Product deleted successfully.");
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteColor")
+    public ResponseEntity<String> deleteColor(
+            @RequestParam String username,
+            @RequestParam String colorItem) {
+        colorNameRepository.deleteByUsernameAndColorItem(username, colorItem);
+        return ResponseEntity.ok("Color deleted successfully.");
+    }
+
 }

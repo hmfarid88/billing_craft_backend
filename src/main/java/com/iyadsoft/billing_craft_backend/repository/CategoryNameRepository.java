@@ -12,4 +12,5 @@ public interface CategoryNameRepository extends JpaRepository<CategoryName, Long
 
     boolean existsByUsernameAndCategoryItem(String username, String categoryItem);
     
+    void deleteByUsernameAndCategoryItem(String username, String categoryItem);
 }

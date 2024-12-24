@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO;
 import com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO;
+import com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
@@ -80,31 +81,22 @@ public class ProductController {
 
     @PostMapping("/addProducts")
     @Transactional
-    public ResponseEntity<List<ProductStock>> newProducts(@RequestBody List<ProductStock> newProducts) {
-        List<ProductStock> savedProducts = new ArrayList<>();
-        ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
+    public ResponseEntity<List<ProductStock>> newProducts(@RequestBody
+    List<ProductStock> newProducts) {
+    List<ProductStock> savedProducts = new ArrayList<>();
+    ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
 
-        for (ProductStock product : newProducts) {
-            if (productRepository.existsByUsernameAndProductno(product.getUsername(), product.getProductno())) {
-                throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
-            }
-            product.setTime(dhakaTime.toLocalTime());
-            savedProducts.add(product);
-        }
-
-        savedProducts = productRepository.saveAll(savedProducts);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
+    for (ProductStock product : newProducts) {
+    if (productRepository.existsByUsernameAndProductnoNotInProductSale(product.getUsername(),
+    product.getProductno())) {
+    throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
+    }
+    product.setTime(dhakaTime.toLocalTime());
+    savedProducts.add(product);
     }
 
-    @PostMapping("/addNewCategory")
-    public ResponseEntity<?> saveCategory(@RequestBody CategoryName categoryName) {
-        if (categoryNameRepository.existsByUsernameAndCategoryItem(categoryName.getUsername(),
-                categoryName.getCategoryItem())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Sorry, this category is already exists!");
-
-        }
-        CategoryName savedCategory = categoryNameRepository.save(categoryName);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    savedProducts = productRepository.saveAll(savedProducts);
+    return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
     }
 
     @PostMapping("/addNewBrand")
@@ -360,6 +352,13 @@ public class ProductController {
             @RequestParam String colorItem) {
         colorNameRepository.deleteByUsernameAndColorItem(username, colorItem);
         return ResponseEntity.ok("Color deleted successfully.");
+    }
+
+    @GetMapping("/getProductInfo")
+    public ResponseEntity<List<ProductDetailDTO>> getAllProductOccurrences(
+            @RequestParam String username,
+            @RequestParam String productno) {
+        return ResponseEntity.ok(productStockService.getAllProductOccurrences(username, productno));
     }
 
 }

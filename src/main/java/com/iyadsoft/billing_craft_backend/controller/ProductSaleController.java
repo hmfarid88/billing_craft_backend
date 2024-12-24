@@ -8,11 +8,15 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 import com.iyadsoft.billing_craft_backend.service.ProductSaleService;
@@ -35,7 +39,7 @@ public class ProductSaleController {
 
             // Prepare the response
             Map<String, Object> response = new HashMap<>();
-            response.put("customer", saleRequest.getCustomer()); // Assuming customer info is directly from the request
+            response.put("customer", saleRequest.getCustomer());
             response.put("salesItems", savedSalesItems);
 
             return ResponseEntity.ok(response);
@@ -43,5 +47,41 @@ public class ProductSaleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "An error occurred while processing the sale"));
         }
+    }
+
+    @DeleteMapping("/saleReturn")
+    public ResponseEntity<Object> deleteSaleAndCustomer(@RequestParam String username, @RequestParam String productno) {
+        try {
+            productSaleService.deleteSaleAndCustomer(username, productno);
+            return ResponseEntity.ok(Map.of("message", "Sale deleted successfully."));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "An error occurred."));
+        }
+    }
+
+    @GetMapping("/lastCustomerCid")
+    public ResponseEntity<?> getLastCustomerCid(@RequestParam String username) {
+        String lastCid = productSaleService.getLastCustomerCidByUsername(username);
+        if (lastCid != null) {
+            Map<String, String> response = new HashMap<>();
+            response.put("lastCid", lastCid);
+            return ResponseEntity.ok(response); // This ensures a JSON response
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer CID not found");
+        }
+    }
+
+    @GetMapping("/last-six-months")
+    public List<Map<String, Object>> getLastSixMonthsSales(@RequestParam String username) {
+        return productSaleService.getLastSixMonthsSales(username);
+    }
+
+    @GetMapping("/last-12-months")
+    public ResponseEntity<List<LossProfitAnalysis>> getLastTwelveMonthsProfitLoss(@RequestParam String username) {
+        List<LossProfitAnalysis> profitLossData = productSaleService.getLastTwelveMonthsProfitLoss(username);
+        return ResponseEntity.ok(profitLossData);
     }
 }

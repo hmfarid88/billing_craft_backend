@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
@@ -29,7 +30,12 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.UpdateableStock(ps.supplier, ps.productName, ps.pprice, COUNT(ps.productno)) FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL GROUP BY ps.supplier, ps.productName, ps.pprice")
       List<UpdateableStock> getProductsStockByUsernameAndSupplier(String username);
 
-      boolean existsByUsernameAndProductno(String username, String productno);
+           @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN TRUE ELSE FALSE END " +
+           "FROM ProductStock ps " +
+           "WHERE ps.username = :username " +
+           "AND ps.productno = :productno " +
+           "AND ps.proId NOT IN (SELECT psale.productStock.proId FROM ProductSale psale)")
+    boolean existsByUsernameAndProductnoNotInProductSale(String username, String productno);
 
       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
                   "p.category, p.brand, p.productName, " +
@@ -72,4 +78,16 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
 
       @Query("SELECT ps FROM ProductStock ps WHERE ps.username = :username AND ps.productno = :productno AND ps.proId NOT IN (SELECT DISTINCT ps.proId FROM ProductSale psale JOIN psale.productStock ps)")
       List<ProductStock> findProductsNotInSalesStock(@Param("username") String username, @Param("productno") String productno);
+
+      @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO( " +
+           "ps.category, ps.brand, ps.productName, ps.productno, ps.color, ps.pprice, ps.sprice, ps.supplier, ps.supplierInvoice, ps.date, ps.time, " +
+           "CASE WHEN psale IS NOT NULL THEN 'sold' ELSE 'stored' END, " +
+           "psale.saleType, psale.sprice, psale.discount, psale.offer, psale.date, psale.time, c.cid, c.cName, c.phoneNumber) " +
+           "FROM ProductStock ps " +
+           "LEFT JOIN ProductSale psale ON ps.proId = psale.productStock.proId " +
+           "LEFT JOIN Customer c ON psale.customer.cid = c.cid " +
+           "WHERE ps.username = :username AND ps.productno = :productno")
+    List<ProductDetailDTO> findAllProductOccurrences(@Param("username") String username, @Param("productno") String productno);
+
+     
 }

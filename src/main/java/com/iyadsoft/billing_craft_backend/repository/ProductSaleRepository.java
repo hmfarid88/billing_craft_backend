@@ -110,11 +110,11 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
         @Query("SELECT ps.customer.cid FROM ProductSale ps WHERE ps.username = :username ORDER BY ps.saleId DESC LIMIT 1")
         String findLastCustomerCidByUsername(@Param("username") String username);
 
-        @Query("SELECT MONTHNAME(ps.date) AS month, SUM(ps.sprice - ps.discount) AS totalSaleValue " +
+        @Query("SELECT MONTHNAME(ps.date) AS month, SUM(COALESCE(ps.sprice, 0) - COALESCE(ps.discount, 0)) AS totalSaleValue " +
         "FROM ProductSale ps " +
         "WHERE ps.username = :username AND ps.saleType = 'customer' " +
         "AND ps.date BETWEEN :startDate AND :endDate " +
-        "GROUP BY MONTH(ps.date) " +
+        "GROUP BY MONTHNAME(ps.date) " +
         "ORDER BY MONTH(ps.date)")
         List<Object[]> findLastSixMonthsSalesByUser(
          @Param("username") String username,

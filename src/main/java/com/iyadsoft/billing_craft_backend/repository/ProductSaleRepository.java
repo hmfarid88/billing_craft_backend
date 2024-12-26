@@ -14,6 +14,7 @@ import com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO;
 import com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO;
 import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
+import com.iyadsoft.billing_craft_backend.dto.SixMonthAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 
@@ -110,19 +111,18 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
         @Query("SELECT ps.customer.cid FROM ProductSale ps WHERE ps.username = :username ORDER BY ps.saleId DESC LIMIT 1")
         String findLastCustomerCidByUsername(@Param("username") String username);
 
-        @Query("SELECT MONTHNAME(ps.date) AS month, SUM(COALESCE(ps.sprice, 0) - COALESCE(ps.discount, 0)) AS totalSaleValue " +
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SixMonthAnalysis(MONTHNAME(ps.date) AS month, SUM(COALESCE(ps.sprice, 0) - COALESCE(ps.discount, 0)) AS Value) " +
         "FROM ProductSale ps " +
         "WHERE ps.username = :username AND ps.saleType = 'customer' " +
         "AND ps.date BETWEEN :startDate AND :endDate " +
-        "GROUP BY MONTHNAME(ps.date) " +
-        "ORDER BY MONTH(ps.date)")
-        List<Object[]> findLastSixMonthsSalesByUser(
+        "GROUP BY MONTHNAME(ps.date) ")
+         List<SixMonthAnalysis> findLastSixMonthsSalesByUser(
          @Param("username") String username,
          @Param("startDate") LocalDate startDate,
          @Param("endDate") LocalDate endDate
  );
 
-//  List<ProductSale> findByDateBetween(LocalDate startDate, LocalDate endDate);
+
 @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis(" +
        "FUNCTION('MONTHNAME', s.date), " + 
        "SUM(CASE WHEN (s.sprice > s.productStock.pprice) THEN (s.sprice - s.discount - s.productStock.pprice) ELSE 0 END), " +

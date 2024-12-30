@@ -29,4 +29,5 @@ public class InvoiceDataDTO {
     private Double vatAmount;
     private Double received;
     private String cid;
+    private Long saleId;
 }

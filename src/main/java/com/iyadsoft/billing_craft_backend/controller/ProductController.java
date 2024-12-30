@@ -30,6 +30,7 @@ import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
 import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
+import com.iyadsoft.billing_craft_backend.entity.Currency;
 import com.iyadsoft.billing_craft_backend.entity.Pricedrop;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductName;
@@ -42,6 +43,7 @@ import com.iyadsoft.billing_craft_backend.repository.ProductNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductStockRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductSaleRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierNameRepository;
+import com.iyadsoft.billing_craft_backend.service.CurrencyService;
 import com.iyadsoft.billing_craft_backend.service.ProductStockService;
 import com.iyadsoft.billing_craft_backend.service.VatService;
 
@@ -60,6 +62,9 @@ public class ProductController {
 
     @Autowired
     private ProductStockService productStockService;
+
+    @Autowired
+    private CurrencyService currencyService;
 
     @Autowired
     private VatService vatService;
@@ -141,7 +146,16 @@ public class ProductController {
         }
         supplierNameRepository.save(supplierName);
         return ResponseEntity.ok("Supplier Added Successfully");
-        // return ResponseEntity.status(HttpStatus.CREATED).body(savedSupplier);
+      }
+
+      @PostMapping("/currencyEntry")
+      public Currency saveOrUpdateCurrency(@RequestParam String username, @RequestParam String currency) {
+          return currencyService.saveOrUpdateCurrency(username, currency);
+      }
+
+      @GetMapping("/getCurrency")
+      public Currency getCurrencyByUsername(@RequestParam String username) {
+        return currencyService.getCurrencyByUsername(username);
     }
 
     @GetMapping("/getCategoryItem")
@@ -360,5 +374,19 @@ public class ProductController {
             @RequestParam String productno) {
         return ResponseEntity.ok(productStockService.getAllProductOccurrences(username, productno));
     }
+
+    @GetMapping("/getPreviousInvoice")
+public ResponseEntity<InvoiceDataDTO> getPreviousInvoice(@RequestParam String username, @RequestParam Long saleId) {
+    return productSaleRepository.getPreviousInvoiceBySaleId(username, saleId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+}
+
+@GetMapping("/getNextInvoice")
+public ResponseEntity<InvoiceDataDTO> getNextInvoice(@RequestParam String username, @RequestParam Long saleId) {
+    return productSaleRepository.getNextInvoiceBySaleId(username, saleId)
+        .map(ResponseEntity::ok)
+        .orElse(ResponseEntity.notFound().build());
+}
 
 }

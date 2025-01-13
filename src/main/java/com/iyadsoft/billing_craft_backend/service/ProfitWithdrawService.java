@@ -14,12 +14,20 @@ public class ProfitWithdrawService {
     @Autowired
     private ProfitWithdrawRepository profitWithdrawRepository;
 
-    public Double getCurrentMonthSum(String username) {
+    public Double getCurrentMonthWithdrawSum(String username) {
         LocalDate today = LocalDate.now();
         int currentYear = today.getYear();
         int currentMonth = today.getMonthValue();
 
-        return profitWithdrawRepository.findCurrentMonthSum(username, currentYear, currentMonth);
+        return profitWithdrawRepository.findCurrentMonthWithdrawSum(username, currentYear, currentMonth);
+    }
+
+    public Double getCurrentMonthDepositSum(String username) {
+        LocalDate today = LocalDate.now();
+        int currentYear = today.getYear();
+        int currentMonth = today.getMonthValue();
+
+        return profitWithdrawRepository.findCurrentMonthDepositSum(username, currentYear, currentMonth);
     }
 
     public List<ProfitWithdraw> getProfitWithdrawsByUsername(String username) {

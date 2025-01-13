@@ -88,8 +88,7 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
         @Query("SELECT SUM(COALESCE(ps.productStock.pprice, 0.0)) AS totalSoldValue " +
                         "FROM ProductSale ps " +
                         "WHERE ps.saleType='vendor' AND ps.username = :username AND ps.customer.cName = :cName")
-        Double findTotalSoldValueByUsernameAndSupplier(@Param("username") String username,
-                        @Param("cName") String supplier);
+        Double findTotalSoldValueByUsernameAndSupplier(@Param("username") String username, @Param("cName") String supplier);
 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date, ps.customer.cid, 0.0, SUM(ps.productStock.pprice), 0.0, 0.0) "
                         +

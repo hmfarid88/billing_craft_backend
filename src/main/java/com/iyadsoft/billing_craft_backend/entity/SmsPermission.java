@@ -10,15 +10,13 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserInfo {
+@AllArgsConstructor
+public class SmsPermission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
-    private String email;
-    private String password;
-    private String roles;
     private String status;
+    private int qty;
 }

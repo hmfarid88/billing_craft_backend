@@ -104,6 +104,17 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
     }
 
+    @PostMapping("/addNewCategory")
+    public ResponseEntity<?> addCategory(@RequestBody CategoryName categoryName) {
+        if (categoryNameRepository.existsByUsernameAndCategoryItem(categoryName.getUsername(),
+                categoryName.getCategoryItem())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Category " + categoryName.getCategoryItem() + " is already exists!");
+        }
+        CategoryName savedCategory = categoryNameRepository.save(categoryName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+    }
+
     @PostMapping("/addNewBrand")
     public ResponseEntity<?> saveBrand(@RequestBody BrandName brandName) {
         if (brandNameRepository.existsByUsernameAndBrandItem(brandName.getUsername(),
@@ -186,6 +197,11 @@ public class ProductController {
     @GetMapping("/getProductStock")
     public List<ProductStock> getProductsStockByUsername(@RequestParam String username) {
         return productRepository.getProductsStockByUsername(username);
+    }
+
+    @GetMapping("/getReturnedStock")
+    public List<ProductStock> getReturnedStockByUsername(@RequestParam String username) {
+        return productRepository.getReturnedsStockByUsername(username);
     }
 
     @GetMapping("/getMonthlyProductEntry")

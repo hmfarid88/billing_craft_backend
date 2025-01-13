@@ -1,5 +1,8 @@
 package com.iyadsoft.billing_craft_backend.controller;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
+import com.iyadsoft.billing_craft_backend.entity.ProductStock;
+import com.iyadsoft.billing_craft_backend.repository.ProductSaleRepository;
+import com.iyadsoft.billing_craft_backend.repository.ProductStockRepository;
 import com.iyadsoft.billing_craft_backend.service.ProductSaleService;
 
 @RestController
 @RequestMapping("/sales")
 public class ProductSaleController {
     private final ProductSaleService productSaleService;
+
+    @Autowired
+    private ProductStockRepository productStockRepository;
+
+    @Autowired
+    private ProductSaleRepository productSaleRepository;
 
     @Autowired
     public ProductSaleController(ProductSaleService productSaleService) {
@@ -47,6 +59,26 @@ public class ProductSaleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "An error occurred while processing the sale"));
         }
+    }
+
+    @PostMapping("/purchaseReturn")
+    public ProductSale purchaseReturn(@RequestParam Long proId, @RequestParam String username) {
+                     
+        ProductStock productStock = productStockRepository.findById(proId)
+                .orElseThrow(() -> new RuntimeException("ProductStock not found"));
+        ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
+        ProductSale productSale = new ProductSale();
+        productSale.setSaleType("returned");
+        productSale.setSprice(0.0);
+        productSale.setDiscount(0.0);
+        productSale.setOffer(0.0);
+        productSale.setDate(LocalDate.now());
+        productSale.setTime(dhakaTime.toLocalTime());
+        productSale.setUsername(username);
+        productSale.setProductStock(productStock);
+
+        return productSaleRepository.save(productSale);
+
     }
 
     @DeleteMapping("/saleReturn")

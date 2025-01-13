@@ -17,6 +17,6 @@ public interface CustomerRepository extends JpaRepository<Customer, String> {
     @Query("DELETE FROM Customer c WHERE c.cid = :cid")
     void deleteByCid(@Param("cid") String cid);
 
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerDto(c.cName, c.phoneNumber, c.cid) FROM Customer c WHERE c.username = :username AND c.phoneNumber = :phoneNumber")
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerDto(c.cName, c.phoneNumber, c.cid, c.address) FROM Customer c WHERE c.username = :username AND c.phoneNumber = :phoneNumber")
     List<CustomerDto> findByUsernameAndPhoneNumber(String username, String phoneNumber);
 }

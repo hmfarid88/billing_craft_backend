@@ -3,6 +3,8 @@ package com.iyadsoft.billing_craft_backend.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,8 +46,21 @@ public class UserController {
                     .body("Username " + userInfo.getUsername() + " already exists!");
         }
         userInfo.setPassword(passwordEncoder.encode(userInfo.getPassword()));
+        userInfo.setStatus("ON");
         UserInfo savedUser = userInfoRepository.save(userInfo);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    }
+
+    @PutMapping("/update-status")
+    public ResponseEntity<?> updateUserStatus(@RequestParam String username, @RequestParam boolean status) {
+        UserInfo userInfo = userInfoRepository.findByUsername(username);
+        if (userInfo == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        userInfo.setStatus(status ? "ON" : "OFF");
+        userInfoRepository.save(userInfo);
+
+        return ResponseEntity.ok(userInfo);
     }
 
     @PutMapping("/userChange")
@@ -77,7 +92,6 @@ public class UserController {
             return ResponseEntity.status(404).body("User not found.");
         }
     }
-    
 
     @GetMapping("/userLogin")
     public ResponseEntity<Map<String, String>> getUserInfo(@RequestParam String username,
@@ -87,6 +101,7 @@ public class UserController {
             Map<String, String> response = new HashMap<>();
             response.put("message", "User found");
             response.put("roles", user.getRoles());
+            response.put("status", user.getStatus());
             return ResponseEntity.ok(response);
         } else {
             Map<String, String> error = new HashMap<>();

@@ -11,4 +11,5 @@ public class CustomerDto {
     private String customer;
     private String phoneNumber;
     private String invoice;
+    private String address;
 }

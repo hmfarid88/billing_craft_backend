@@ -56,9 +56,11 @@ public class CashBookService {
     public List<ReceiveDto> getReceivesForToday(String username, LocalDate date) {
         List<ReceiveDto> userPayments = paymentRecordRepository.findReceivesForToday(username, date);
         List<ReceiveDto> supplierPayments = supplierPaymentRepository.findSupplierReceivesForToday(username, date);
+        List<ReceiveDto> profitDeposit = profitWithdrawRepository.findProfitDepositForToday(username, date);
         List<ReceiveDto> combinedPayments = new ArrayList<>();
         combinedPayments.addAll(userPayments);
         combinedPayments.addAll(supplierPayments);
+        combinedPayments.addAll(profitDeposit);
         return combinedPayments;
     }
 

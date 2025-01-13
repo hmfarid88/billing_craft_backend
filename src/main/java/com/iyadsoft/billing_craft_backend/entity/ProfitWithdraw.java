@@ -21,6 +21,7 @@ public class ProfitWithdraw {
     private LocalDate date;
     private int year;
     private int month;
+    private String type;
     private String note;
     private Double amount;
     private String username;

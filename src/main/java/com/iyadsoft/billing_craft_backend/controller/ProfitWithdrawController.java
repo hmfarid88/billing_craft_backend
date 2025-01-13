@@ -21,14 +21,24 @@ public class ProfitWithdrawController {
     @Autowired
     private ProfitWithdrawRepository profitWithdrawRepository;
 
-    @GetMapping("/current-month-sum")
-    public Double getCurrentMonthProfitSum(@RequestParam String username) {
-        return profitWithdrawService.getCurrentMonthSum(username);
+    @GetMapping("/current-month-withdrawsum")
+    public Double getCurrentMonthProfitWithdraw(@RequestParam String username) {
+        return profitWithdrawService.getCurrentMonthWithdrawSum(username);
     }
 
-    @GetMapping("/selected-month-sum")
-    public Double getSelectedMonthProfitSum(@RequestParam String username, int year, int month) {
-        return profitWithdrawRepository.findCurrentMonthSum(username, year, month);
+    @GetMapping("/current-month-depositsum")
+    public Double getCurrentMonthProfitDeposit(@RequestParam String username) {
+        return profitWithdrawService.getCurrentMonthWithdrawSum(username);
+    }
+
+    @GetMapping("/selected-month-withdrawsum")
+    public Double getSelectedMonthProfitWithdraw(@RequestParam String username, int year, int month) {
+        return profitWithdrawRepository.findCurrentMonthWithdrawSum(username, year, month);
+    }
+
+    @GetMapping("/selected-month-depositsum")
+    public Double getSelectedMonthDepositsum(@RequestParam String username, int year, int month) {
+        return profitWithdrawRepository.findCurrentMonthDepositSum(username, year, month);
     }
 
     @GetMapping("/profit-withdraws")

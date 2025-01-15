@@ -26,16 +26,16 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ProductSaleService {
-    private final SmsService smsService;
+    // private final SmsService smsService;
     private final CustomerRepository customerRepository;
     private final ProductSaleRepository productSaleRepository;
     private final ProductStockRepository productStockRepository;
 
     @Autowired
-    public ProductSaleService(SmsService smsService, CustomerRepository customerRepository,
+    public ProductSaleService( CustomerRepository customerRepository,
             ProductSaleRepository productSaleRepository,
             ProductStockRepository productStockRepository) {
-        this.smsService = smsService;
+        // this.smsService = smsService;
         this.customerRepository = customerRepository;
         this.productSaleRepository = productSaleRepository;
         this.productStockRepository = productStockRepository;
@@ -49,7 +49,7 @@ public class ProductSaleService {
         // Prepare to save each ProductSale item
         List<ProductSale> savedSalesItems = new ArrayList<>();
         ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
-        double totalValue = 0;
+        // double totalValue = 0;
         // Loop through each sales item in the request
         for (SalesItemDTO salesItemDTO : saleRequest.getSalesItems()) {
             // Fetch ProductStock based on proId
@@ -57,7 +57,7 @@ public class ProductSaleService {
                     .orElseThrow(
                             () -> new RuntimeException("ProductStock not found for proId: " + salesItemDTO.getProId()));
 
-            totalValue += (salesItemDTO.getSprice() - salesItemDTO.getDiscount() - salesItemDTO.getOffer());
+            // totalValue += (salesItemDTO.getSprice() - salesItemDTO.getDiscount() - salesItemDTO.getOffer());
             // Create ProductSale and set fields
             ProductSale productSale = new ProductSale();
             productSale.setCustomer(savedCustomer); // Associate with saved customer
@@ -74,12 +74,12 @@ public class ProductSaleService {
             savedSalesItems.add(productSaleRepository.save(productSale));
         }
 
-        String smsResponse = smsService.sendSms(
-                savedCustomer.getUsername(),
-                savedCustomer.getPhoneNumber(),
-                "Dear " + savedCustomer.getCName() + ", your total bill is ৳" + totalValue + ". Thank you for shopping from " + savedCustomer.getUsername() + " !");
+        // String smsResponse = smsService.sendSms(
+        //         savedCustomer.getUsername(),
+        //         savedCustomer.getPhoneNumber(),
+        //         "Dear " + savedCustomer.getCName() + ", your total bill is ৳" + totalValue + ". Thank you for shopping from " + savedCustomer.getUsername() + " !");
 
-        System.out.println("SMS API Response: " + smsResponse);
+        // System.out.println("SMS API Response: " + smsResponse);
 
         return null;
 

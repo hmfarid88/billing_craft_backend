@@ -84,14 +84,42 @@ public class ProductStockService {
         return productStockRepository.findProductsNotInSalesStock(username, productno);
     }
 
+    // public ProductStock updateProductStock(Long proId, ProductStock updatedProduct) {
+    //     Optional<ProductStock> existingProductOpt = productStockRepository.findById(proId);
+
+    //     if (existingProductOpt.isPresent()) {
+    //         ProductStock existingProduct = existingProductOpt.get();
+           
+    //         existingProduct.setCategory(updatedProduct.getCategory());
+    //         existingProduct.setBrand(updatedProduct.getBrand());
+    //         existingProduct.setProductName(updatedProduct.getProductName());
+    //         existingProduct.setPprice(updatedProduct.getPprice());
+    //         existingProduct.setSprice(updatedProduct.getSprice());
+    //         existingProduct.setColor(updatedProduct.getColor());
+    //         existingProduct.setSupplier(updatedProduct.getSupplier());
+    //         existingProduct.setSupplierInvoice(updatedProduct.getSupplierInvoice());
+    //         existingProduct.setProductno(updatedProduct.getProductno());
+    //         existingProduct.setDate(updatedProduct.getDate());
+          
+    //         return productStockRepository.save(existingProduct);
+    //     } else {
+    //         throw new RuntimeException("Product with proId " + proId + " not found.");
+    //     }
+       
+    // }
+
     public ProductStock updateProductStock(Long proId, ProductStock updatedProduct) {
         Optional<ProductStock> existingProductOpt = productStockRepository.findById(proId);
-
+    
         if (existingProductOpt.isPresent()) {
             ProductStock existingProduct = existingProductOpt.get();
-            
-            // Update fields
-            // existingProduct.setUsername(updatedProduct.getUsername());
+    
+            boolean productNoExists = productStockRepository.existsByProductnoAndProIdNot(updatedProduct.getProductno(), proId);
+            if (productNoExists) {
+                
+                throw new RuntimeException("Product number " + updatedProduct.getProductno() + " already exists.");
+            }
+    
             existingProduct.setCategory(updatedProduct.getCategory());
             existingProduct.setBrand(updatedProduct.getBrand());
             existingProduct.setProductName(updatedProduct.getProductName());
@@ -102,15 +130,13 @@ public class ProductStockService {
             existingProduct.setSupplierInvoice(updatedProduct.getSupplierInvoice());
             existingProduct.setProductno(updatedProduct.getProductno());
             existingProduct.setDate(updatedProduct.getDate());
-            // existingProduct.setTime(updatedProduct.getTime());
-
-            // Save the updated product
+    
             return productStockRepository.save(existingProduct);
         } else {
             throw new RuntimeException("Product with proId " + proId + " not found.");
         }
-       
     }
+    
 
     public List<ProductDetailDTO> getAllProductOccurrences(String username, String productno) {
         return productStockRepository.findAllProductOccurrences(username, productno);

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -326,18 +327,12 @@ public class ProductController {
         return productStockService.getProductsNotInSalesStock(username, productno);
     }
 
-    @PutMapping("/products/update/{proId}")
-    public ResponseEntity<?> updateProductStock(
-            @PathVariable Long proId,
-            @RequestBody ProductStock updatedProduct) {
-        try {
-            ProductStock productStock = productStockService.updateProductStock(proId, updatedProduct);
-            return ResponseEntity.ok(productStock);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Product with ID " + proId + " not found.");
-        }
-    }
+
+@PutMapping("/products/update/{proId}")
+public ResponseEntity<?> updateProductStock(@PathVariable Long proId, @RequestBody ProductStock updatedProduct) {
+    productStockService.updateProductStock(proId, updatedProduct);
+    return ResponseEntity.ok(Collections.singletonMap("message", "Product updated successfully!"));
+}
 
     @Transactional
     @DeleteMapping("/deleteCategory")

@@ -92,5 +92,8 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
            "WHERE ps.username = :username AND ps.productno = :productno")
     List<ProductDetailDTO> findAllProductOccurrences(@Param("username") String username, @Param("productno") String productno);
 
+
+    boolean existsByProductnoAndProIdNot(String productno, Long proId);
+
      
 }

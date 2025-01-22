@@ -14,6 +14,7 @@ public class InvoiceDataDTO {
     private String cname;
     private String phoneNumber;
     private String address;
+    private String soldby;
     private String brand;
     private String productName;
     private String productno;

@@ -21,10 +21,10 @@ import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 
 @Repository
 public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> {
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid,  s.productStock.proId, s.username) FROM ProductSale s WHERE s.username=:username AND s.saleType='customer' AND s.date = CURRENT_DATE")
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.customer.soldby, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid,  s.productStock.proId, s.username) FROM ProductSale s WHERE s.username=:username AND s.saleType='customer' AND s.date = CURRENT_DATE")
         List<CustomerProductSaleDTO> getProductsSaleByUsername(String username);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.customer.soldby, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
                         +
                         "FROM ProductSale s " +
                         "WHERE s.username = :username AND s.saleType = 'customer' " +
@@ -52,30 +52,28 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
                         "AND s.date BETWEEN :startDate AND :endDate GROUP BY s.productStock.category, s.productStock.brand, s.productStock.productName ")
         List<ProfitItemDto> getDatewiseProfitSaleByUsername(String username, LocalDate startDate, LocalDate endDate);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.productStock.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.customer.soldby, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.productStock.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
                         +
                         "FROM ProductSale s " +
                         "WHERE s.username = :username AND s.saleType = 'vendor' " +
                         "AND MONTH(s.date) = MONTH(CURRENT_DATE) AND YEAR(s.date) = YEAR(CURRENT_DATE)")
         List<CustomerProductSaleDTO> getVendorSaleByUsernameForCurrentMonth(String username);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.customer.soldby, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
                         +
                         "FROM ProductSale s " +
                         "WHERE s.saleType = 'customer' " +
                         "AND s.username = :username AND s.date BETWEEN :startDate AND :endDate")
-        List<CustomerProductSaleDTO> getProductsSaleByUsernameDatewise(String username, LocalDate startDate,
-                        LocalDate endDate);
+        List<CustomerProductSaleDTO> getProductsSaleByUsernameDatewise(String username, LocalDate startDate, LocalDate endDate);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.productStock.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CustomerProductSaleDTO(s.customer.cName, s.customer.phoneNumber, s.customer.address, s.customer.soldby, s.productStock.category, s.productStock.brand, s.productStock.productName, s.productStock.productno, s.productStock.color, s.productStock.pprice, s.productStock.sprice, s.discount, s.offer, s.date, s.time, s.customer.cid, s.productStock.proId, s.username) "
                         +
                         "FROM ProductSale s " +
                         "WHERE s.saleType = 'vendor' " +
                         "AND s.username = :username AND s.date BETWEEN :startDate AND :endDate")
-        List<CustomerProductSaleDTO> getVendorSaleByUsernameDatewise(String username, LocalDate startDate,
-                        LocalDate endDate);
+        List<CustomerProductSaleDTO> getVendorSaleByUsernameDatewise(String username, LocalDate startDate, LocalDate endDate);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) FROM ProductSale s JOIN s.customer c JOIN s.productStock ps WHERE s.username=:username and c.cid=:cid")
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) FROM ProductSale s JOIN s.customer c JOIN s.productStock ps WHERE s.username=:username and c.cid=:cid")
         List<InvoiceDataDTO> getInvoiceDataByUsername(String username, String cid);
 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto(ps.date, ps.customer.cid, sum(ps.productStock.sprice+ps.customer.vatAmount-ps.discount-ps.offer-ps.customer.cardPay) as value) "
@@ -134,7 +132,7 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
        "ORDER BY MONTH(s.date)")
 List<LossProfitAnalysis> findLastTwelveMonthsProfitLoss(@Param("username") String username, @Param("startDate") LocalDate startDate);
 
-@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
+@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
        "FROM ProductSale s " +
        "JOIN s.customer c " +
        "JOIN s.productStock ps " +
@@ -142,7 +140,7 @@ List<LossProfitAnalysis> findLastTwelveMonthsProfitLoss(@Param("username") Strin
        "ORDER BY s.saleId DESC LIMIT 1")
 Optional<InvoiceDataDTO> getPreviousInvoiceBySaleId(String username, Long saleId);
 
-@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
+@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
        "FROM ProductSale s " +
        "JOIN s.customer c " +
        "JOIN s.productStock ps " +

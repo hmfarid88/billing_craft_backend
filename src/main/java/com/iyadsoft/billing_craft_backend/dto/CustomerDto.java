@@ -12,4 +12,5 @@ public class CustomerDto {
     private String phoneNumber;
     private String invoice;
     private String address;
+    private String soldby;
 }

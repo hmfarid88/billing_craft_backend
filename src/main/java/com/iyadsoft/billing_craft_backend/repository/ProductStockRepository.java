@@ -85,7 +85,7 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO( " +
            "ps.category, ps.brand, ps.productName, ps.productno, ps.color, ps.pprice, ps.sprice, ps.supplier, ps.supplierInvoice, ps.date, ps.time, " +
            "CASE WHEN psale IS NOT NULL THEN 'sold' ELSE 'stored' END, " +
-           "psale.saleType, psale.sprice, psale.discount, psale.offer, psale.date, psale.time, c.cid, c.cName, c.phoneNumber) " +
+           "psale.saleType, psale.sprice, psale.discount, psale.offer, psale.date, psale.time, c.cid, c.cName, c.phoneNumber, c.soldby) " +
            "FROM ProductStock ps " +
            "LEFT JOIN ProductSale psale ON ps.proId = psale.productStock.proId " +
            "LEFT JOIN Customer c ON psale.customer.cid = c.cid " +

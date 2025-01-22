@@ -21,6 +21,7 @@ public class Customer {
     private String cName;
     private String phoneNumber;
     private String address;
+    private String soldby;
     private Double cardPay;
     private Double vatAmount;
     private Double received;

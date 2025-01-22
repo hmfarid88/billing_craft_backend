@@ -32,6 +32,7 @@ public class ProductDetailDTO {
     private String invoice;
     private String cName;
     private String phoneNumber;
+    private String soldby;
    
 
 }

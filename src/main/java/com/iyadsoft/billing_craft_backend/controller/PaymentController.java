@@ -27,6 +27,7 @@ import com.iyadsoft.billing_craft_backend.repository.PaymentNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.PaymentRecordRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProfitWithdrawRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierPaymentRepository;
+import com.iyadsoft.billing_craft_backend.service.PayRecevService;
 import com.iyadsoft.billing_craft_backend.service.SupplierBalanceService;
 
 @RestController
@@ -49,6 +50,9 @@ public class PaymentController {
 
     @Autowired
     private SupplierBalanceService supplierBalanceService;
+
+    @Autowired
+    private PayRecevService payRecevService;
 
     @PostMapping("/addPaymentName")
     public ResponseEntity<?> addPaymentName(@RequestBody PaymentName paymentName) {
@@ -91,8 +95,9 @@ public class PaymentController {
     }
 
     @GetMapping("/getPaymentRecord-details")
-    public List<PayRecevDetails> getPaymentRecordDetailsByUsername(@RequestParam String username, @RequestParam String paymentName) {
-        return paymentRecordRepository.findDatePaymentReceiveAndNoteByUserAndPaymentName(username, paymentName);
+    public List<PayRecevDetails> getPaymentRecordDetailsByUsername(@RequestParam String username,
+            @RequestParam String paymentName) {
+        return payRecevService.getPaymentReceiveDetails(username, paymentName);
     }
 
     @GetMapping("/getSupplierBalance")
@@ -101,7 +106,8 @@ public class PaymentController {
     }
 
     @GetMapping("/getSupplierBalance-details")
-    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username, @RequestParam String supplierName) {
+    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username,
+            @RequestParam String supplierName) {
         return supplierBalanceService.getSupplierDetails(username, supplierName);
     }
 
@@ -111,7 +117,8 @@ public class PaymentController {
     }
 
     @GetMapping("/getDatewiseExpense")
-    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+    public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
         return expenseRepository.findExpenseForDatewise(username, startDate, endDate);
     }
 
@@ -121,7 +128,8 @@ public class PaymentController {
     }
 
     @GetMapping("/getDatewiseExpenseSum")
-    public Double getDatewiseExpenseSumByUsername(@RequestParam String username, LocalDate startDate, LocalDate endDate) {
+    public Double getDatewiseExpenseSumByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
         return expenseRepository.findDatewiseMonthSum(username, startDate, endDate);
     }
 }

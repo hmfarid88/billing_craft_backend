@@ -82,23 +82,12 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
                         "GROUP BY pr.paymentName")
         List<PayRecevBalance> findPayRecevSummaryBalances(@Param("username") String username);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails( " +
-                        "pr.date, pr.paymentNote, " +
-                        "SUM(CASE WHEN pr.paymentType = 'payment' THEN pr.amount ELSE 0 END) AS payment, " +
-                        "SUM(CASE WHEN pr.paymentType = 'receive' THEN pr.amount ELSE 0 END) AS receive, " +
-                        "(SELECT SUM(CASE WHEN pr2.paymentType = 'payment' THEN pr2.amount ELSE 0 END) - " +
-                        "        SUM(CASE WHEN pr2.paymentType = 'receive' THEN pr2.amount ELSE 0 END) " +
-                        " FROM PaymentRecord pr2 " +
-                        " WHERE pr2.username = :username AND pr2.paymentName = :paymentName " +
-                        " AND (pr2.date < pr.date OR (pr2.date = pr.date AND pr2.id <= pr.id)) " +
-                        ") AS balance " +
-                        ") " +
-                        "FROM PaymentRecord pr " +
-                        "WHERE pr.username = :username AND pr.paymentName = :paymentName " +
-                        "GROUP BY pr.date, pr.paymentNote, pr.id " +
-                        "ORDER BY pr.date, pr.id")
-        List<PayRecevDetails> findDatePaymentReceiveAndNoteByUserAndPaymentName(
-                        @Param("username") String username,
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, p.amount, 0.0) FROM PaymentRecord p WHERE p.paymentType='payment' AND p.username=:username AND p.paymentName=:paymentName ORDER BY p.date, p.id")
+        List<PayRecevDetails> findPaymentsByUserAndPaymentName(@Param("username") String username,
+                        @Param("paymentName") String paymentName);
+
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, 0.0, p.amount) FROM PaymentRecord p WHERE p.paymentType='receive' AND p.username=:username AND p.paymentName=:paymentName ORDER BY p.date, p.id")
+        List<PayRecevDetails> findReceivesByUserAndPaymentName(@Param("username") String username,
                         @Param("paymentName") String paymentName);
 
 }

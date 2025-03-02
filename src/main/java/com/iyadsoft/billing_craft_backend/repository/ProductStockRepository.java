@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
+import com.iyadsoft.billing_craft_backend.dto.SaleReturnDto;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
@@ -21,8 +22,14 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
       @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL")
       List<ProductStock> getProductsStockByUsername(String username);
 
-      @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale.saleType='returned' ")
-      List<ProductStock> getReturnedsStockByUsername(String username);
+      @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SaleReturnDto(ps.productStock.category, ps.productStock.brand, ps.productStock.productName, ps.productStock.color, ps.productStock.productno, ps.productStock.supplier, ps.productStock.supplierInvoice, ps.productStock.pprice, ps.productStock.sprice, ps.productStock.date, ps.productStock.time) " +
+      "FROM ProductSale ps " +
+      "JOIN ps.productStock p " +
+      "WHERE ps.saleType = 'returned' AND ps.username = :username")
+      List<SaleReturnDto> getReturnedsStockByUsername(String username);
+
+     //  @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale.saleType='returned'")
+     //  List<ProductStock> getReturnedsStockByUsername(String username);
 
       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND MONTH(ps.date) = MONTH(CURRENT_DATE) AND YEAR(ps.date) = YEAR(CURRENT_DATE)")
       List<ProductEntryDto> getProductsStockByUsernameForCurrentMonth(@Param("username") String username);

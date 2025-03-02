@@ -27,6 +27,7 @@ import com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductEntryDto;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
+import com.iyadsoft.billing_craft_backend.dto.SaleReturnDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
 import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
@@ -201,7 +202,7 @@ public class ProductController {
     }
 
     @GetMapping("/getReturnedStock")
-    public List<ProductStock> getReturnedStockByUsername(@RequestParam String username) {
+    public List<SaleReturnDto> getReturnedStockByUsername(@RequestParam String username) {
         return productRepository.getReturnedsStockByUsername(username);
     }
 

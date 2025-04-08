@@ -55,7 +55,7 @@ public class CashbookController {
     }
 
     @GetMapping("/sales/customer")
-    public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username, @RequestParam LocalDate date) {
-        return cashBookService.getCustomerSalesDetails(username, date);
+    public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username) {
+        return cashBookService.getCustomerSalesDetails(username);
     }
 }

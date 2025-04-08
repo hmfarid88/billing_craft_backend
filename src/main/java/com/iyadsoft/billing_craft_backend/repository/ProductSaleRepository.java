@@ -80,9 +80,8 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto(ps.date, ps.customer.cid, sum(ps.productStock.sprice+ps.customer.vatAmount-ps.discount-ps.offer-ps.customer.cardPay) as value) "
                         +
                         "FROM ProductSale ps " +
-                        "WHERE ps.saleType = 'customer' AND (ps.productStock.sprice-ps.discount-ps.offer)>0 AND ps.username=:username AND ps.date=:date group by ps.date, ps.customer.cid")
-        List<CashbookSaleDto> findCustomerSalesDetails(@Param("username") String username,
-                        @Param("date") LocalDate date);
+                        "WHERE ps.saleType = 'customer' AND (ps.productStock.sprice-ps.discount-ps.offer)>0 AND ps.username=:username AND ps.date=CURRENT_DATE group by ps.date, ps.customer.cid")
+        List<CashbookSaleDto> findCustomerSalesDetails(@Param("username") String username);
 
         @Query("SELECT SUM(COALESCE(ps.productStock.pprice, 0.0)) AS totalSoldValue " +
                         "FROM ProductSale ps " +

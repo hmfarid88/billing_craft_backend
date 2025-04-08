@@ -29,4 +29,5 @@ public class VatService {
     public Optional<Double> getPercentByUsername(String username) {
         return vatRepository.findPercentByUsername(username);
     }
+    
 }

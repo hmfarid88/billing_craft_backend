@@ -75,6 +75,10 @@ public class ProductStockService {
         LocalDate today = LocalDate.now();
         return productStockRepository.countProductByUsernameGroupByCategoryBrandProductName(username, today);
     }
+
+    // public List<ProductStockCountDTO> getPreviousProductSummary(String username, LocalDate date) {
+    //     return productStockRepository.countPreviousProductSummary(username, date);
+    // }
     
     public List<Pricedrop> getPricedropsByUsername(String username) {
         return pricedropRepository.findByUsername(username);

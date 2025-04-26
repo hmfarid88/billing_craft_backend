@@ -22,9 +22,11 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
                         +
                         "  (SELECT COALESCE(SUM(ps.sprice - ps.discount - ps.offer), 0) FROM product_sale ps "
                         +
-                        "WHERE ps.sale_type = 'customer' AND ps.username = :username AND DATE(ps.date) < :date) + " +
-
-                        "(SELECT COALESCE(SUM(amount), 0) FROM profit_withdraw WHERE type='deposit' AND username = :username AND DATE(date) < :date) "
+                        "WHERE ps.sale_type = 'customer' AND ps.username = :username AND DATE(ps.date) < :date) + "
+                        +
+                        "(SELECT COALESCE(SUM(amount), 0) FROM profit_withdraw WHERE type='deposit' AND username = :username AND DATE(date) < :date) + "
+                        +
+                        "(SELECT COALESCE(SUM(c.vat_amount), 0) FROM customer c JOIN product_sale ps ON c.cid = ps.cid WHERE c.username = :username AND DATE(ps.date) < :date) "
                         +
                         ") - ( " +
                         "  (SELECT COALESCE(SUM(amount), 0) FROM expense WHERE username = :username AND DATE(date) < :date) + "
@@ -44,6 +46,8 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
                         "  (SELECT COALESCE(SUM(amount), 0) FROM supplier_payment WHERE payment_type='receive' AND username = :username) + "
                         +
                         "  (SELECT COALESCE(SUM(ps.sprice - ps.discount - ps.offer), 0) FROM product_sale ps WHERE ps.sale_type = 'customer' AND ps.username = :username) + "
+                         +
+                        "  (SELECT COALESCE(SUM(c.vat_amount), 0) FROM customer c JOIN product_sale ps ON c.cid = ps.cid WHERE c.username = :username) + "
                         +
                         "  (SELECT COALESCE(SUM(amount), 0) FROM profit_withdraw WHERE type='deposit' AND username = :username) "
                         +

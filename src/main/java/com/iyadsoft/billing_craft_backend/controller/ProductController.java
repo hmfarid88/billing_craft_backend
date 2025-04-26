@@ -37,7 +37,6 @@ import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
 import com.iyadsoft.billing_craft_backend.entity.Currency;
-import com.iyadsoft.billing_craft_backend.entity.Customer;
 import com.iyadsoft.billing_craft_backend.entity.Pricedrop;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductName;

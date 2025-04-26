@@ -15,7 +15,7 @@ public class WebConfig implements WebMvcConfigurer{
                 registry.addMapping("/**")
                         .allowedOrigins("http://billingcraft.iyadsoft.com")
                         // .allowedOrigins("http://82.112.230.46:3002")
-                        // .allowedOrigins("http://localhost:3000")
+                        .allowedOrigins("http://localhost:3000")
                         // .allowedOriginPatterns("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

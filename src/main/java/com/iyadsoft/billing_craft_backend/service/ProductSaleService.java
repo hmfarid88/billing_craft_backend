@@ -59,8 +59,13 @@ public class ProductSaleService {
                     .orElseThrow(
                             () -> new RuntimeException("ProductStock not found for proId: " + salesItemDTO.getProId()));
 
-            totalValue += (salesItemDTO.getSprice() + customer.getVatAmount() - salesItemDTO.getDiscount()
-                    - salesItemDTO.getOffer());
+                            totalValue += (
+                                (salesItemDTO.getSprice() != null ? salesItemDTO.getSprice() : 0.0) +
+                                (customer.getVatAmount() != null ? customer.getVatAmount() : 0.0) -
+                                (salesItemDTO.getDiscount() != null ? salesItemDTO.getDiscount() : 0.0) -
+                                (salesItemDTO.getOffer() != null ? salesItemDTO.getOffer() : 0.0)
+                            );
+                            
             // Create ProductSale and set fields
             ProductSale productSale = new ProductSale();
             productSale.setCustomer(savedCustomer); // Associate with saved customer

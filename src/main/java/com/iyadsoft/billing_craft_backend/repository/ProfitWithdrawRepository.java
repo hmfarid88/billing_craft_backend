@@ -17,7 +17,7 @@ public interface ProfitWithdrawRepository extends JpaRepository<ProfitWithdraw, 
             + "FROM ProfitWithdraw p WHERE p.type='withdraw' AND p.username=:username AND p.date = :date")
     List<PaymentDto> findProfitWithdrawForToday(@Param("username") String username, @Param("date") LocalDate date);
 
-    @Query(value = "SELECT new com.iyadsoft.billing_craft_backend.dto.PaymentDto(p.date, 'profit deposit', p.note, p.amount) "
+    @Query(value = "SELECT new com.iyadsoft.billing_craft_backend.dto.ReceiveDto(p.date, 'profit deposit', p.note, p.amount) "
             + "FROM ProfitWithdraw p WHERE p.type='deposit' AND p.username=:username AND p.date = :date")
     List<ReceiveDto> findProfitDepositForToday(@Param("username") String username, @Param("date") LocalDate date);
 

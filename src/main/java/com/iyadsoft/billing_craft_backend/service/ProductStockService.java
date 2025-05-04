@@ -54,7 +54,7 @@ public class ProductStockService {
                 productStockRepository.save(productStock);
             } else {
                 throw new DuplicateEntityException(
-                        "Product " + productStock.getProductno() + " is already in pricedrop!");
+                        "This Product is already pricedroped!");
             }
         }
     }

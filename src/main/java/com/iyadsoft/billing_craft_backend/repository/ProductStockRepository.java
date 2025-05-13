@@ -47,18 +47,19 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
                "AND ps.proId NOT IN (SELECT psale.productStock.proId FROM ProductSale psale)")
      boolean existsByUsernameAndProductnoNotInProductSale(String username, String productno);
 
-     @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
-               "p.category, p.brand, p.productName, " +
-               "SUM(CASE WHEN p.date < :today THEN 1 ELSE 0 END) AS countBeforeToday, " +
-               "SUM(CASE WHEN p.date = :today THEN 1 ELSE 0 END) AS countToday) " +
-               "FROM ProductStock p " +
-               "LEFT JOIN p.productSale ps " +
-               "WHERE p.username = :username " +
-               "AND ps.id IS NULL " +
-               "GROUP BY p.category, p.brand, p.productName")
-     List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName(
-               @Param("username") String username,
-               @Param("today") LocalDate today);
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
+       "p.category, p.brand, p.productName, " +
+       "SUM(CASE WHEN p.date < :today THEN 1 ELSE 0 END)-SUM(CASE WHEN p.date < :today AND ps.date < :today THEN 1 ELSE 0 END), " +
+       "SUM(CASE WHEN p.date = :today THEN 1 ELSE 0 END), " +
+       "SUM(CASE WHEN ps.date = :today THEN 1 ELSE 0 END)) " +
+       "FROM ProductStock p " +
+       "LEFT JOIN p.productSale ps " +
+       "WHERE p.username = :username " +
+       "GROUP BY p.category, p.brand, p.productName ORDER BY p.category, p.brand, p.productName")
+List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName(
+       @Param("username") String username,
+       @Param("today") LocalDate today);
+
 
      @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PreviousStockDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username= :username AND ps.date <= :date AND ps.productno NOT IN ("
                +

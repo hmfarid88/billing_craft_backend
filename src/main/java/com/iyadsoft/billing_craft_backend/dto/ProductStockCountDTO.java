@@ -13,4 +13,5 @@ public class ProductStockCountDTO {
     private String productName;
     private Long countBeforeToday;
     private Long countToday;
+    private Long soldToday;
 }

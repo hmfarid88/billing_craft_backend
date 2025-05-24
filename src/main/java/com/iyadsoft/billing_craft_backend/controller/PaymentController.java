@@ -6,8 +6,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +32,7 @@ import com.iyadsoft.billing_craft_backend.repository.ProfitWithdrawRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierPaymentRepository;
 import com.iyadsoft.billing_craft_backend.service.PayRecevService;
 import com.iyadsoft.billing_craft_backend.service.SupplierBalanceService;
+import com.iyadsoft.billing_craft_backend.service.TransactionService;
 
 @RestController
 @RequestMapping("/payment")
@@ -53,6 +57,9 @@ public class PaymentController {
 
     @Autowired
     private PayRecevService payRecevService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     @PostMapping("/addPaymentName")
     public ResponseEntity<?> addPaymentName(@RequestBody PaymentName paymentName) {
@@ -132,4 +139,125 @@ public class PaymentController {
             LocalDate endDate) {
         return expenseRepository.findDatewiseMonthSum(username, startDate, endDate);
     }
+
+    @GetMapping("/getLast7daysExpense")
+    public List<Expense> getLast7ExpenseByUsername(@RequestParam String username) {
+        return transactionService.getLast7DaysExpenses(username);
+    }
+
+    @GetMapping("/getLast7daysOfficePayment")
+    public List<PaymentRecord> getLast7OfficepaymentByUsername(@RequestParam String username) {
+        return transactionService.getLast7DaysOfficePayment(username);
+    }
+
+    @GetMapping("/getLast7daysSupplierPayment")
+    public List<SupplierPayment> getLast7SupplierPaymentByUsername(@RequestParam String username) {
+        return transactionService.getLast7DaysSupplierPayment(username);
+    }
+
+    @GetMapping("/getExpenseById")
+    public ResponseEntity<Expense> getExpenseByUsernameAndId(@RequestParam Long id, @RequestParam String username) {
+
+        return expenseRepository.findByIdAndUsername(id, username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/getOfficePayById")
+    public ResponseEntity<PaymentRecord> getOfficdePayByUsernameAndId(@RequestParam Long id,
+            @RequestParam String username) {
+
+        return paymentRecordRepository.findByIdAndUsername(id, username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/getSupplierPayById")
+    public ResponseEntity<SupplierPayment> getSupplierPayByUsernameAndId(@RequestParam Long id,
+            @RequestParam String username) {
+
+        return supplierPaymentRepository.findByIdAndUsername(id, username)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/expense/update/{id}")
+    public ResponseEntity<Expense> updateExpenseById(@PathVariable Long id, @RequestBody Expense updatedExpense) {
+        return expenseRepository.findById(id)
+                .map(existingExpense -> {
+                    existingExpense.setDate(updatedExpense.getDate());
+                    existingExpense.setExpenseName(updatedExpense.getExpenseName());
+                    existingExpense.setExpenseNote(updatedExpense.getExpenseNote());
+                    existingExpense.setAmount(updatedExpense.getAmount());
+
+                    Expense saved = expenseRepository.save(existingExpense);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/officepay/update/{id}")
+    public ResponseEntity<PaymentRecord> updateOfficepayById(@PathVariable Long id,
+            @RequestBody PaymentRecord updatedExpense) {
+        return paymentRecordRepository.findById(id)
+                .map(existingExpense -> {
+                    existingExpense.setDate(updatedExpense.getDate());
+                    existingExpense.setPaymentName(updatedExpense.getPaymentName());
+                    existingExpense.setPaymentType(updatedExpense.getPaymentType());
+                    existingExpense.setPaymentNote(updatedExpense.getPaymentNote());
+                    existingExpense.setAmount(updatedExpense.getAmount());
+
+                    PaymentRecord saved = paymentRecordRepository.save(existingExpense);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/supplierpay/update/{id}")
+    public ResponseEntity<SupplierPayment> updateSupplierpayById(@PathVariable Long id,
+            @RequestBody SupplierPayment updatedExpense) {
+        return supplierPaymentRepository.findById(id)
+                .map(existingExpense -> {
+                    existingExpense.setDate(updatedExpense.getDate());
+                    existingExpense.setSupplierName(updatedExpense.getSupplierName());
+                    existingExpense.setPaymentType(updatedExpense.getPaymentType());
+                    existingExpense.setNote(updatedExpense.getNote());
+                    existingExpense.setAmount(updatedExpense.getAmount());
+
+                    SupplierPayment saved = supplierPaymentRepository.save(existingExpense);
+                    return ResponseEntity.ok(saved);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/deleteExpenseById/{id}")
+    public ResponseEntity<String> deleteExpenseById(@PathVariable Long id) {
+        if (expenseRepository.existsById(id)) {
+            expenseRepository.deleteById(id);
+             return ResponseEntity.ok("Expense deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found.");
+        }
+    }
+
+    @DeleteMapping("/deleteOfficepayById/{id}")
+    public ResponseEntity<String> deleteOfficepayById(@PathVariable Long id) {
+        if (paymentRecordRepository.existsById(id)) {
+            paymentRecordRepository.deleteById(id);
+            return ResponseEntity.ok("Payment deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Payment not found. ");
+        }
+    }
+
+    @DeleteMapping("/deleteSupplierpayById/{id}")
+    public ResponseEntity<String> deleteSupplierpayById(@PathVariable Long id) {
+        if (supplierPaymentRepository.existsById(id)) {
+            supplierPaymentRepository.deleteById(id);
+            return ResponseEntity.ok("Payment deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Payment not found.");
+        }
+    }
+
 }

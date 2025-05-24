@@ -88,30 +88,6 @@ public class ProductStockService {
         return productStockRepository.findProductsNotInSalesStock(username, productno);
     }
 
-    // public ProductStock updateProductStock(Long proId, ProductStock updatedProduct) {
-    //     Optional<ProductStock> existingProductOpt = productStockRepository.findById(proId);
-
-    //     if (existingProductOpt.isPresent()) {
-    //         ProductStock existingProduct = existingProductOpt.get();
-           
-    //         existingProduct.setCategory(updatedProduct.getCategory());
-    //         existingProduct.setBrand(updatedProduct.getBrand());
-    //         existingProduct.setProductName(updatedProduct.getProductName());
-    //         existingProduct.setPprice(updatedProduct.getPprice());
-    //         existingProduct.setSprice(updatedProduct.getSprice());
-    //         existingProduct.setColor(updatedProduct.getColor());
-    //         existingProduct.setSupplier(updatedProduct.getSupplier());
-    //         existingProduct.setSupplierInvoice(updatedProduct.getSupplierInvoice());
-    //         existingProduct.setProductno(updatedProduct.getProductno());
-    //         existingProduct.setDate(updatedProduct.getDate());
-          
-    //         return productStockRepository.save(existingProduct);
-    //     } else {
-    //         throw new RuntimeException("Product with proId " + proId + " not found.");
-    //     }
-       
-    // }
-
     public ProductStock updateProductStock(Long proId, ProductStock updatedProduct) {
         Optional<ProductStock> existingProductOpt = productStockRepository.findById(proId);
     

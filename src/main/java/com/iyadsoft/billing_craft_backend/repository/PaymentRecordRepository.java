@@ -2,6 +2,7 @@ package com.iyadsoft.billing_craft_backend.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -46,7 +47,7 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
                         "  (SELECT COALESCE(SUM(amount), 0) FROM supplier_payment WHERE payment_type='receive' AND username = :username) + "
                         +
                         "  (SELECT COALESCE(SUM(ps.sprice - ps.discount - ps.offer), 0) FROM product_sale ps WHERE ps.sale_type = 'customer' AND ps.username = :username) + "
-                         +
+                        +
                         "  (SELECT COALESCE(SUM(c.vat_amount), 0) FROM customer c JOIN product_sale ps ON c.cid = ps.cid WHERE c.username = :username) + "
                         +
                         "  (SELECT COALESCE(SUM(amount), 0) FROM profit_withdraw WHERE type='deposit' AND username = :username) "
@@ -93,5 +94,10 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, 0.0, p.amount) FROM PaymentRecord p WHERE p.paymentType='receive' AND p.username=:username AND p.paymentName=:paymentName ORDER BY p.date, p.id")
         List<PayRecevDetails> findReceivesByUserAndPaymentName(@Param("username") String username,
                         @Param("paymentName") String paymentName);
+
+        @Query("SELECT e FROM PaymentRecord e WHERE e.username = :username AND e.date >= :startDate ORDER BY e.date DESC")
+        List<PaymentRecord> findLast7DaysOfficePaymentByUsername(String username, LocalDate startDate);
+
+        Optional<PaymentRecord> findByIdAndUsername(Long id, String username);
 
 }

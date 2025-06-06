@@ -25,7 +25,7 @@ public class CashbookController {
     private CashBookService cashBookService;
 
     @GetMapping("/net-sum-before-today")
-    public Double getNetSumAmountBeforeToday(@RequestParam String username, LocalDate date) {
+    public Double getNetSumAmountBeforeToday(@RequestParam String username, @RequestParam LocalDate date) {
         return paymentRecordRepository.findNetSumAmountBeforeToday(username, date);
     }
 
@@ -45,17 +45,17 @@ public class CashbookController {
     }
 
     @GetMapping("/payments/today")
-    public List<PaymentDto> getPaymentsForToday(@RequestParam String username, LocalDate date) {
+    public List<PaymentDto> getPaymentsForToday(@RequestParam String username, @RequestParam LocalDate date) {
         return cashBookService.getPaymentsForToday(username, date);
     }
 
     @GetMapping("/receives/today")
-    public List<ReceiveDto> getReceivesForToday(@RequestParam String username, LocalDate date) {
+    public List<ReceiveDto> getReceivesForToday(@RequestParam String username, @RequestParam LocalDate date) {
         return cashBookService.getReceivesForToday(username, date);
     }
 
     @GetMapping("/sales/customer")
-    public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username) {
-        return cashBookService.getCustomerSalesDetails(username);
+    public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username, @RequestParam LocalDate date) {
+        return cashBookService.getCustomerSalesDetails(username, date);
     }
 }

@@ -64,7 +64,7 @@ public class CashBookService {
         return combinedPayments;
     }
 
-    public List<CashbookSaleDto> getCustomerSalesDetails(String username) {
-        return productSaleRepository.findCustomerSalesDetails(username);
+    public List<CashbookSaleDto> getCustomerSalesDetails(String username, LocalDate date) {
+        return productSaleRepository.findCustomerSalesDetails(username, date);
     }
 }

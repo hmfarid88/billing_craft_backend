@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -83,11 +84,16 @@ public class ProductSaleService {
         }
         NumberFormat numberFormat = NumberFormat.getNumberInstance(new Locale("en", "IN"));
         String formattedTotalValue = numberFormat.format(totalValue);
+        String productNumbers = savedSalesItems.stream()
+                .map(sale -> sale.getProductStock().getProductno())
+                .distinct()
+                .collect(Collectors.joining(", "));
         String smsResponse = smsService.sendSms(
                 savedCustomer.getUsername(),
                 savedCustomer.getPhoneNumber(),
-                "Dear " + savedCustomer.getCName() + ", your total bill is ৳" + formattedTotalValue
-                        + ". Thanks for shopping from " + savedCustomer.getUsername() + ".");
+                "Dear " + savedCustomer.getCName() + " sir, your product no(s): " + productNumbers
+                        + ", total bill is Tk " + formattedTotalValue
+                        + ". Thanks for purchasing from " + savedCustomer.getUsername() + ".");
 
         System.out.println("SMS API Response: " + smsResponse);
 

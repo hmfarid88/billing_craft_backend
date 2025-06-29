@@ -48,14 +48,14 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
      boolean existsByUsernameAndProductnoNotInProductSale(String username, String productno);
 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
-       "p.category, p.brand, p.productName, " +
+       "p.category, p.brand, p.productName, p.color, " +
        "SUM(CASE WHEN p.date < :today THEN 1 ELSE 0 END)-SUM(CASE WHEN p.date < :today AND ps.date < :today THEN 1 ELSE 0 END), " +
        "SUM(CASE WHEN p.date = :today THEN 1 ELSE 0 END), " +
        "SUM(CASE WHEN ps.date = :today THEN 1 ELSE 0 END)) " +
        "FROM ProductStock p " +
        "LEFT JOIN p.productSale ps " +
        "WHERE p.username = :username " +
-       "GROUP BY p.category, p.brand, p.productName ORDER BY p.category, p.brand, p.productName")
+       "GROUP BY p.category, p.brand, p.productName, p.color ORDER BY p.category, p.brand, p.productName, p.color")
 List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName(
        @Param("username") String username,
        @Param("today") LocalDate today);

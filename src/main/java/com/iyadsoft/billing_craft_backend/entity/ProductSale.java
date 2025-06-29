@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,6 +17,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "product_sale", indexes = {
+    @Index(name = "idx_productsale_username", columnList = "username"),
+    @Index(name = "idx_productsale_date", columnList = "date"),
+    @Index(name = "idx_productsale_cid", columnList = "cid"),
+    @Index(name = "idx_productsale_pro_id", columnList = "pro_id")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

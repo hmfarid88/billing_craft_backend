@@ -3,6 +3,8 @@ package com.iyadsoft.billing_craft_backend.entity;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -11,6 +13,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "supplier_payment", indexes = {
+    @Index(name = "idx_supplierpayment_username", columnList = "username"),
+    @Index(name = "idx_supplierpayment_date", columnList = "date"),
+    @Index(name = "idx_supplierpayment_supplier", columnList = "supplierName"),
+    @Index(name = "idx_supplierpayment_type", columnList = "paymentType")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

@@ -82,11 +82,19 @@ List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName
 
      @Query("SELECT SUM(COALESCE(ps.pprice, 0.0)) AS totalProductValue " +
                "FROM ProductStock ps " +
-               "WHERE ps.username = :username AND ps.supplier = :supplier")
+               "WHERE ps.username = :username AND ps.supplier = :supplier AND ps.proId NOT IN (" +
+                                            "      SELECT psr.productStock.proId " +
+                                            "      FROM ProductSale psr " +
+                                            "      WHERE psr.saleType = 'returned'" +
+                                            "  )")
      Double findTotalProductValueByUsernameAndSupplier(@Param("username") String username,
                @Param("supplier") String supplier);
 
-     @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date, ps.supplierInvoice, SUM(ps.pprice), 0.0, 0.0, 0.0, 'No') FROM ProductStock ps WHERE ps.username = :username AND ps.supplier = :supplierName GROUP BY ps.date, ps.supplierInvoice")
+     @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date, ps.supplierInvoice, COUNT(ps.productno), SUM(ps.pprice), 0.0, 0.0, 0.0, 'No') FROM ProductStock ps WHERE ps.username = :username AND ps.supplier = :supplierName  AND ps.proId NOT IN (" + 
+                        "      SELECT psr.productStock.proId " + 
+                        "      FROM ProductSale psr " +
+                        "      WHERE psr.saleType = 'returned' " + 
+                        "  )  GROUP BY ps.date, ps.supplierInvoice")
      List<SupplierDetailsDto> findProductDetailsByUsernameAndSupplierName(String username, String supplierName);
 
      @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND ps.supplier=:supplier AND ps.productName=:productName AND ps.pprice=:pprice AND psale IS NULL")

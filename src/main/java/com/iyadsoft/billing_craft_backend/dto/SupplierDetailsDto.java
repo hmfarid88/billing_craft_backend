@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class SupplierDetailsDto {
     private LocalDate date;
     private String invoice;
+    private Long qty;
     private Double pvalue;
     private Double svalue;
     private Double payment;

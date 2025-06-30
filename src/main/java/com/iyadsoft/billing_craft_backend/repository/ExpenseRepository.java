@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.iyadsoft.billing_craft_backend.dto.PaymentDto;
 import com.iyadsoft.billing_craft_backend.entity.Expense;
+import com.iyadsoft.billing_craft_backend.entity.PaymentRecord;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PaymentDto(e.date, e.expenseName, e.expenseNote, e.amount) "
@@ -21,6 +22,12 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query("SELECT e FROM Expense e WHERE e.username = :username AND e.date BETWEEN :startDate AND :endDate")
     List<Expense> findExpenseForDatewise(@Param("username") String username, @Param("startDate")LocalDate startDate, @Param ("endDate") LocalDate endDate);
+   
+    @Query("SELECT e FROM PaymentRecord e WHERE e.username = :username AND MONTH(e.date) = MONTH(CURRENT_DATE) AND YEAR(e.date) = YEAR(CURRENT_DATE)")
+    List<PaymentRecord> findPaymentRecordForCurrentMonth(@Param("username") String username);
+
+    @Query("SELECT e FROM PaymentRecord e WHERE e.username = :username AND e.date BETWEEN :startDate AND :endDate")
+    List<PaymentRecord> findPaymentRecordForDatewise(@Param("username") String username, @Param("startDate")LocalDate startDate, @Param ("endDate") LocalDate endDate);
     
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.username = :username AND YEAR(e.date) = :year AND MONTH(e.date) = :month")
     Double findSelectedMonthSum(@Param("username") String username, @Param("year") int year, @Param("month") int month);

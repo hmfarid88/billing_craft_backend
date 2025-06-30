@@ -113,8 +113,7 @@ public class PaymentController {
     }
 
     @GetMapping("/getSupplierBalance-details")
-    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username,
-            @RequestParam String supplierName) {
+    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username, @RequestParam String supplierName) {
         return supplierBalanceService.getSupplierDetails(username, supplierName);
     }
 
@@ -127,6 +126,17 @@ public class PaymentController {
     public List<Expense> getDatewiseExpenseByUsername(@RequestParam String username, LocalDate startDate,
             LocalDate endDate) {
         return expenseRepository.findExpenseForDatewise(username, startDate, endDate);
+    }
+
+    @GetMapping("/getMonthlyPaymentRecord")
+    public List<PaymentRecord> getMonthlyPaymentByUsername(@RequestParam String username) {
+        return expenseRepository.findPaymentRecordForCurrentMonth(username);
+    }
+
+    @GetMapping("/getDatewisePaymentRecord")
+    public List<PaymentRecord> getDatewisePaymentByUsername(@RequestParam String username, LocalDate startDate,
+            LocalDate endDate) {
+        return expenseRepository.findPaymentRecordForDatewise(username, startDate, endDate);
     }
 
     @GetMapping("/getSelectedSum")

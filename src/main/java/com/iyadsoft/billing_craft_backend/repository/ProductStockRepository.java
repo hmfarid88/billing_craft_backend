@@ -118,7 +118,7 @@ List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName
      List<ProductDetailDTO> findAllProductOccurrences(@Param("username") String username,
                @Param("productno") String productno);
 
-     boolean existsByProductnoAndProIdNot(String productno, Long proId);
+     boolean existsByUsernameAndProductnoAndProIdNot(String username, String productno, Long proId);
 
      Optional<ProductStock> findTopByUsernameAndBrandAndProductNameOrderByProIdDesc(String username, String brand,
                String productName);

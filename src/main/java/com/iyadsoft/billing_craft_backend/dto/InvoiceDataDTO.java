@@ -23,6 +23,7 @@ public class InvoiceDataDTO {
     private LocalTime time;
     private String saleType;
     private Double pprice;
+    private Double rsprice;
     private Double sprice;
     private Double discount;
     private Double offer;

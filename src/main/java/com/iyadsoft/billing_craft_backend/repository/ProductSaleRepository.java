@@ -74,7 +74,7 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
                         "AND s.username = :username AND s.date BETWEEN :startDate AND :endDate")
         List<CustomerProductSaleDTO> getVendorSaleByUsernameDatewise(String username, LocalDate startDate, LocalDate endDate);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) FROM ProductSale s JOIN s.customer c JOIN s.productStock ps WHERE s.username=:username and c.cid=:cid")
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, ps.sprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) FROM ProductSale s JOIN s.customer c JOIN s.productStock ps WHERE s.username=:username and c.cid=:cid")
         List<InvoiceDataDTO> getInvoiceDataByUsername(String username, String cid);
 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto(ps.date, ps.customer.cid, sum(ps.sprice + ps.customer.vatAmount-ps.discount-ps.offer-ps.customer.cardPay) as value) "
@@ -132,7 +132,7 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
        "ORDER BY MONTH(s.date)")
 List<LossProfitAnalysis> findLastTwelveMonthsProfitLoss(@Param("username") String username, @Param("startDate") LocalDate startDate);
 
-@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
+@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, ps.sprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
        "FROM ProductSale s " +
        "JOIN s.customer c " +
        "JOIN s.productStock ps " +
@@ -140,7 +140,7 @@ List<LossProfitAnalysis> findLastTwelveMonthsProfitLoss(@Param("username") Strin
        "ORDER BY s.saleId DESC LIMIT 1")
 Optional<InvoiceDataDTO> getPreviousInvoiceBySaleId(String username, Long saleId);
 
-@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
+@Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, ps.sprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) " +
        "FROM ProductSale s " +
        "JOIN s.customer c " +
        "JOIN s.productStock ps " +

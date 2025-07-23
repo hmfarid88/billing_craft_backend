@@ -111,7 +111,7 @@ public class UserController {
 
     @GetMapping("/user/userList")
     public List<UserInfo> getUsers() {
-        return userInfoRepository.findAll();
+        return userInfoRepository.findByRoles("ROLE_USER");
     }
 
     @PostMapping("/adminValidate")

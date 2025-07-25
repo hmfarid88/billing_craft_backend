@@ -101,8 +101,7 @@ public class ProductController {
         ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
 
         for (ProductStock product : newProducts) {
-            if (productRepository.existsByUsernameAndProductnoNotInProductSale(product.getUsername(),
-                    product.getProductno())) {
+            if (productRepository.existsByUsernameAndProductnoNotInProductSale(product.getUsername(), product.getProductno())) {
                 throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
             }
             product.setTime(dhakaTime.toLocalTime());
@@ -111,6 +110,12 @@ public class ProductController {
 
         savedProducts = productRepository.saveAll(savedProducts);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProducts);
+    }
+
+    @GetMapping("/product-stock/check")
+    public ResponseEntity<Map<String, Boolean>> checkProductNo(@RequestParam String username, @RequestParam String productno) {
+        boolean exists = productRepository.existsByUsernameAndProductnoNotInProductSale(username, productno);
+        return ResponseEntity.ok(Collections.singletonMap("exists", exists));
     }
 
     @PostMapping("/addNewCategory")

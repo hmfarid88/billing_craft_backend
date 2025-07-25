@@ -77,7 +77,7 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
         @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.InvoiceDataDTO(c.cName, c.phoneNumber, c.address, c.soldby, ps.brand, ps.productName, ps.productno, ps.color, s.date, s.time, s.saleType, ps.pprice, ps.sprice, s.sprice, s.discount, s.offer, c.cardPay, c.vatAmount, c.received, c.cid, s.saleId) FROM ProductSale s JOIN s.customer c JOIN s.productStock ps WHERE s.username=:username and c.cid=:cid")
         List<InvoiceDataDTO> getInvoiceDataByUsername(String username, String cid);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto(ps.date, ps.customer.cid, sum(ps.sprice + ps.customer.vatAmount-ps.discount-ps.offer-ps.customer.cardPay) as value) "
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto(ps.date, ps.customer.cid, sum(ps.sprice + ps.customer.vatAmount-ps.discount-ps.offer) as value) "
                         +
                         "FROM ProductSale ps " +
                         "WHERE ps.saleType = 'customer' AND (ps.sprice-ps.discount-ps.offer)>0 AND ps.username=:username AND ps.date= :date group by ps.date, ps.customer.cid")

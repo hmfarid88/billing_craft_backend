@@ -11,18 +11,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "payment_name", indexes = {
+@Table(name = "logo_link", indexes = {
         @Index(name = "idx_username", columnList = "username"),
-        @Index(name = "idx_payment_person", columnList = "paymentPerson")
-       
+        @Index(name = "idx_link", columnList = "link")
+
 })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaymentName {
+public class LogoLink {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String paymentPerson;
     private String username;
+    private String link;
 }

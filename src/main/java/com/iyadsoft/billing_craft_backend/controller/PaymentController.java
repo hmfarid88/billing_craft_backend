@@ -25,11 +25,13 @@ import com.iyadsoft.billing_craft_backend.entity.PaymentName;
 import com.iyadsoft.billing_craft_backend.entity.PaymentRecord;
 import com.iyadsoft.billing_craft_backend.entity.ProfitWithdraw;
 import com.iyadsoft.billing_craft_backend.entity.SupplierPayment;
+import com.iyadsoft.billing_craft_backend.entity.WalletName;
 import com.iyadsoft.billing_craft_backend.repository.ExpenseRepository;
 import com.iyadsoft.billing_craft_backend.repository.PaymentNameRepository;
 import com.iyadsoft.billing_craft_backend.repository.PaymentRecordRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProfitWithdrawRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierPaymentRepository;
+import com.iyadsoft.billing_craft_backend.repository.WalletNameRepository;
 import com.iyadsoft.billing_craft_backend.service.PayRecevService;
 import com.iyadsoft.billing_craft_backend.service.SupplierBalanceService;
 import com.iyadsoft.billing_craft_backend.service.TransactionService;
@@ -48,6 +50,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentNameRepository paymentNameRepository;
+
+    @Autowired
+    private WalletNameRepository walletNameRepository;
 
     @Autowired
     private ProfitWithdrawRepository profitWithdrawRepository;
@@ -71,6 +76,25 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedName);
     }
 
+  @PostMapping("/addWalletName")
+   public ResponseEntity<?> addOrUpdateWalletName(@RequestBody WalletName walletName) {
+    WalletName existingWallet = walletNameRepository.findByUsernameAndWalletName(
+        walletName.getUsername(), walletName.getWalletName()
+    );
+
+    WalletName savedWallet;
+    if (existingWallet != null) {
+        existingWallet.setRate(walletName.getRate()); 
+        savedWallet = walletNameRepository.save(existingWallet);
+        return ResponseEntity.ok(savedWallet);
+    } else {
+        savedWallet = walletNameRepository.save(walletName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedWallet); 
+    }
+}
+
+
+
     @PostMapping("/expenseRecord")
     public Expense newExpense(@RequestBody Expense expense) {
         return expenseRepository.save(expense);
@@ -86,6 +110,30 @@ public class PaymentController {
         return supplierPaymentRepository.save(supplierPayment);
     }
 
+    @PostMapping("/walletPayment")
+    public PaymentRecord walletPayment(@RequestBody PaymentRecord walletPayment) {
+        String paymentType = walletPayment.getPaymentType();
+        if (paymentType.equals("payment")) {
+            WalletName wallet = walletNameRepository.findByUsernameAndWalletName(walletPayment.getUsername(),
+                    walletPayment.getPaymentName());
+            double rate = wallet.getRate();
+            double amount = walletPayment.getAmount();
+            double expenseAmount = (amount * rate) / 100;
+            double remainingAmount = amount - expenseAmount;
+
+            Expense expense = new Expense();
+            expense.setExpenseName("Wallet Fee of " + wallet.getWalletName());
+            expense.setAmount(expenseAmount);
+            expense.setDate(walletPayment.getDate());
+            expense.setExpenseNote("Auto-calculated from wallet: " + wallet.getWalletName());
+            expense.setUsername(walletPayment.getUsername());
+            expenseRepository.save(expense);
+            walletPayment.setAmount(remainingAmount);
+
+        }
+        return paymentRecordRepository.save(walletPayment);
+    }
+
     @PostMapping("/profitWithdraw")
     public ProfitWithdraw newItem(@RequestBody ProfitWithdraw profitWithdraw) {
         return profitWithdrawRepository.save(profitWithdraw);
@@ -94,6 +142,11 @@ public class PaymentController {
     @GetMapping("/getPaymentPerson")
     public List<PaymentName> getPaymentNameByUsername(@RequestParam String username) {
         return paymentNameRepository.getPaymentPersonByUsername(username);
+    }
+
+    @GetMapping("/getWalletName")
+    public List<WalletName> getWalletNameByUsername(@RequestParam String username) {
+        return walletNameRepository.getWalletNameByUsername(username);
     }
 
     @GetMapping("/getPaymentRecord")
@@ -113,7 +166,8 @@ public class PaymentController {
     }
 
     @GetMapping("/getSupplierBalance-details")
-    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username, @RequestParam String supplierName) {
+    public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username,
+            @RequestParam String supplierName) {
         return supplierBalanceService.getSupplierDetails(username, supplierName);
     }
 
@@ -244,7 +298,7 @@ public class PaymentController {
     public ResponseEntity<String> deleteExpenseById(@PathVariable Long id) {
         if (expenseRepository.existsById(id)) {
             expenseRepository.deleteById(id);
-             return ResponseEntity.ok("Expense deleted successfully.");
+            return ResponseEntity.ok("Expense deleted successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Expense not found.");
         }

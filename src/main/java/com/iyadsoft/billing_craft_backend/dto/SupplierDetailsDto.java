@@ -15,7 +15,11 @@ public class SupplierDetailsDto {
     private Long qty;
     private Double pvalue;
     private Double svalue;
+    private Double rvalue;
     private Double payment;
     private Double receive;
     private String note;
+
+    private Double openingBalance;
+    private Double runningBalance;
 }

@@ -14,49 +14,82 @@ import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
 import com.iyadsoft.billing_craft_backend.entity.SupplierPayment;
 
 public interface SupplierPaymentRepository extends JpaRepository<SupplierPayment, Long> {
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PaymentDto(s.date, s.supplierName, s.note, s.amount) "
-            + "FROM SupplierPayment s WHERE s.paymentType='payment' AND s.username = :username AND s.date = :date")
-    List<PaymentDto> findSupplierPaymentsForToday(@Param("username") String username, @Param("date") LocalDate date);
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PaymentDto(s.date, s.supplierName, s.note, s.amount) "
+                        + "FROM SupplierPayment s WHERE s.paymentType='payment' AND s.username = :username AND s.date = :date")
+        List<PaymentDto> findSupplierPaymentsForToday(@Param("username") String username,
+                        @Param("date") LocalDate date);
 
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ReceiveDto(s.date, s.supplierName, s.note, s.amount) "
-            + "FROM SupplierPayment s WHERE s.paymentType='receive' AND s.username = :username AND s.date = :date")
-    List<ReceiveDto> findSupplierReceivesForToday(@Param("username") String username, @Param("date") LocalDate date);
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ReceiveDto(s.date, s.supplierName, s.note, s.amount) "
+                        + "FROM SupplierPayment s WHERE s.paymentType='receive' AND s.username = :username AND s.date = :date")
+        List<ReceiveDto> findSupplierReceivesForToday(@Param("username") String username,
+                        @Param("date") LocalDate date);
 
-    @Query("SELECT " +
-            "COALESCE(SUM(CASE WHEN sp.paymentType = 'payment' THEN sp.amount ELSE 0 END), 0) AS totalPayment " +
-            "FROM SupplierPayment sp " +
-            "WHERE sp.username = :username AND sp.supplierName = :supplierName")
-    Double findTotalPaymentByUsernameAndSupplier(
-            @Param("username") String username,
-            @Param("supplierName") String supplierName);
+        @Query("SELECT " +
+                        "COALESCE(SUM(CASE WHEN sp.paymentType = 'payment' THEN sp.amount ELSE 0 END), 0) AS totalPayment "
+                        +
+                        "FROM SupplierPayment sp " +
+                        "WHERE sp.username = :username AND sp.supplierName = :supplierName")
+        Double findTotalPaymentByUsernameAndSupplier(
+                        @Param("username") String username,
+                        @Param("supplierName") String supplierName);
 
-    @Query("SELECT " +
-            "COALESCE(SUM(CASE WHEN sp.paymentType = 'receive' THEN sp.amount ELSE 0 END), 0) AS totalReceive " +
-            "FROM SupplierPayment sp " +
-            "WHERE sp.username = :username AND sp.supplierName = :supplierName")
-    Double findTotalReceiveByUsernameAndSupplier(
-            @Param("username") String username,
-            @Param("supplierName") String supplierName);
+        @Query("SELECT " +
+                        "COALESCE(SUM(CASE WHEN sp.paymentType = 'receive' THEN sp.amount ELSE 0 END), 0) AS totalReceive "
+                        +
+                        "FROM SupplierPayment sp " +
+                        "WHERE sp.username = :username AND sp.supplierName = :supplierName")
+        Double findTotalReceiveByUsernameAndSupplier(
+                        @Param("username") String username,
+                        @Param("supplierName") String supplierName);
 
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(sp.date, 'Payment', CAST(0 AS long), 0.0, 0.0, sp.amount, 0.0, sp.note) "
-            +
-            "FROM SupplierPayment sp " +
-            "WHERE sp.paymentType = 'payment' AND sp.username = :username AND sp.supplierName = :supplierName")
-    List<SupplierDetailsDto> findDetailsPaymentByUsernameAndSupplier(
-            @Param("username") String username,
-            @Param("supplierName") String supplierName);
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(sp.date, 'Payment', CAST(0 AS long), 0.0, 0.0, 0.0, sp.amount, 0.0, sp.note, 0.0, 0.0) "
+                        +
+                        "FROM SupplierPayment sp " +
+                        "WHERE sp.paymentType = 'payment' AND sp.username = :username AND sp.supplierName = :supplierName AND sp.date BETWEEN :fromDate AND :toDate")
+        List<SupplierDetailsDto> findDetailsPaymentByUsernameAndSupplier(
+                        @Param("username") String username,
+                        @Param("supplierName") String supplierName,
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate);
 
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(sp.date, 'Receive', CAST(0 AS long), 0.0, 0.0, 0.0, sp.amount, sp.note) "
-            +
-            "FROM SupplierPayment sp " +
-            "WHERE sp.paymentType = 'receive' AND sp.username = :username AND sp.supplierName = :supplierName")
-    List<SupplierDetailsDto> findDetailsReceiveByUsernameAndSupplier(
-            @Param("username") String username,
-            @Param("supplierName") String supplierName);
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(sp.date, 'Receive', CAST(0 AS long), 0.0, 0.0, 0.0, 0.0, sp.amount, sp.note, 0.0, 0.0) "
+                        +
+                        "FROM SupplierPayment sp " +
+                        "WHERE sp.paymentType = 'receive' AND sp.username = :username AND sp.supplierName = :supplierName AND sp.date BETWEEN :fromDate AND :toDate")
+        List<SupplierDetailsDto> findDetailsReceiveByUsernameAndSupplier(
+                        @Param("username") String username,
+                        @Param("supplierName") String supplierName,
+                        @Param("fromDate") LocalDate fromDate,
+                        @Param("toDate") LocalDate toDate);
 
-    @Query("SELECT e FROM SupplierPayment e WHERE e.username = :username AND e.date >= :startDate ORDER BY e.date DESC")
-    List<SupplierPayment> findLast7DaysSupplierPaymentByUsername(String username, LocalDate startDate);
+        @Query("SELECT e FROM SupplierPayment e WHERE e.username = :username AND e.date >= :startDate ORDER BY e.date DESC")
+        List<SupplierPayment> findLast7DaysSupplierPaymentByUsername(String username, LocalDate startDate);
 
-    Optional<SupplierPayment> findByIdAndUsername(Long id, String username);
+        Optional<SupplierPayment> findByIdAndUsername(Long id, String username);
+
+        @Query("""
+                        SELECT COALESCE(SUM(sp.amount),0)
+                        FROM SupplierPayment sp
+                        WHERE sp.paymentType = 'payment' AND sp.username=:username
+                        AND sp.supplierName=:supplierName
+                        AND sp.date<:fromDate
+                        """)
+
+        Double sumPaymentBeforeDate(
+                        String username,
+                        String supplierName,
+                        LocalDate fromDate);
+
+        @Query("""
+                        SELECT COALESCE(SUM(sp.amount),0)
+                        FROM SupplierPayment sp
+                        WHERE sp.paymentType = 'receive' AND sp.username=:username
+                        AND sp.supplierName=:supplierName
+                        AND sp.date<:fromDate
+                        """)
+        Double sumReceiveBeforeDate(
+                        String username,
+                        String supplierName,
+                        LocalDate fromDate);
 
 }

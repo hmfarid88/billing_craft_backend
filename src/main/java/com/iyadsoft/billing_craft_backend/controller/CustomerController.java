@@ -2,14 +2,18 @@ package com.iyadsoft.billing_craft_backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.CustomerDto;
+import com.iyadsoft.billing_craft_backend.dto.CustomerUpdateDto;
 import com.iyadsoft.billing_craft_backend.entity.Customer;
 import com.iyadsoft.billing_craft_backend.repository.CustomerRepository;
 import com.iyadsoft.billing_craft_backend.service.CustomerService;
@@ -33,5 +37,13 @@ public class CustomerController {
     @GetMapping("/customers")
     public List<CustomerDto> getCustomers(@RequestParam String username, @RequestParam String phoneNumber) {
         return customerService.getCustomersByUsernameAndPhoneNumber(username, phoneNumber);
+    }
+
+    @PutMapping("/update/{username}")
+    public ResponseEntity<?> updateCustomer(
+            @PathVariable String username,
+            @RequestBody CustomerUpdateDto dto) {
+
+        return customerService.updateCustomer(username, dto);
     }
 }

@@ -36,7 +36,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     Double findDatewiseMonthSum(@Param("username") String username, LocalDate startDate, LocalDate endDate);
 
      @Query("SELECT e FROM Expense e WHERE e.username = :username AND e.date >= :startDate ORDER BY e.date DESC")
-    List<Expense> findLast7DaysExpensesByUsername(String username, LocalDate startDate);
+     List<Expense> findLast7DaysExpensesByUsername(String username, LocalDate startDate);
 
     Optional<Expense> findByIdAndUsername(Long id, String username);
 

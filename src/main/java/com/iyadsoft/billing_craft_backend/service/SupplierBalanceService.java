@@ -1,5 +1,6 @@
 package com.iyadsoft.billing_craft_backend.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,9 +21,9 @@ public class SupplierBalanceService {
     private final SupplierPaymentRepository supplierPaymentRepository;
 
     @Autowired
-    public SupplierBalanceService(ProductStockRepository productStockRepository, 
-                                  ProductSaleRepository productSaleRepository, 
-                                  SupplierPaymentRepository supplierPaymentRepository) {
+    public SupplierBalanceService(ProductStockRepository productStockRepository,
+            ProductSaleRepository productSaleRepository,
+            SupplierPaymentRepository supplierPaymentRepository) {
         this.productStockRepository = productStockRepository;
         this.productSaleRepository = productSaleRepository;
         this.supplierPaymentRepository = supplierPaymentRepository;
@@ -36,7 +37,8 @@ public class SupplierBalanceService {
 
         // Iterate over each supplier and aggregate the data
         for (String supplier : supplierNames) {
-            Double totalProductValue = productStockRepository.findTotalProductValueByUsernameAndSupplier(username, supplier);
+            Double totalProductValue = productStockRepository.findTotalProductValueByUsernameAndSupplier(username,
+                    supplier);
             Double totalSoldValue = productSaleRepository.findTotalSoldValueByUsernameAndSupplier(username, supplier);
             Double totalPayment = supplierPaymentRepository.findTotalPaymentByUsernameAndSupplier(username, supplier);
             Double totalReceive = supplierPaymentRepository.findTotalReceiveByUsernameAndSupplier(username, supplier);
@@ -57,24 +59,91 @@ public class SupplierBalanceService {
 
         return summaries;
     }
+   
+    private Double calculateOpeningBalance(
+            String username,
+            String supplierName,
+            LocalDate fromDate) {
 
-    public List<SupplierDetailsDto> getSupplierDetails(String username, String supplierName) {
-        // Fetch data from each repository method
-        List<SupplierDetailsDto> productPurchases = productStockRepository.findProductDetailsByUsernameAndSupplierName(username, supplierName);
-        List<SupplierDetailsDto> productSales = productSaleRepository.findProductSalesByUsernameAndSupplierName(username, supplierName);
-        List<SupplierDetailsDto> payments = supplierPaymentRepository.findDetailsPaymentByUsernameAndSupplier(username, supplierName);
-        List<SupplierDetailsDto> receipts = supplierPaymentRepository.findDetailsReceiveByUsernameAndSupplier(username, supplierName);
+        Double purchase = productStockRepository.sumPurchaseBeforeDate(
+                username, supplierName, fromDate);
 
-        // Combine the results
-        List<SupplierDetailsDto> combinedDetails = new ArrayList<>();
-        combinedDetails.addAll(productPurchases);
-        combinedDetails.addAll(productSales);
-        combinedDetails.addAll(payments);
-        combinedDetails.addAll(receipts);
+        Double sale = productSaleRepository.sumVendorSaleBeforeDate(
+                username, supplierName, fromDate);
 
-        // Sort the combined list by date (assuming date is a field in SupplierDetailsDto)
-        combinedDetails.sort(Comparator.comparing(SupplierDetailsDto::getDate));
+        Double returned = productStockRepository.sumReturnedBeforeDate(
+                username, supplierName, fromDate);
 
-        return combinedDetails;
+        Double payment = supplierPaymentRepository.sumPaymentBeforeDate(
+                username, supplierName, fromDate);
+
+        Double receive = supplierPaymentRepository.sumReceiveBeforeDate(
+                username, supplierName, fromDate);
+        return value(purchase)
+                - value(sale)
+                - value(returned)
+                - value(payment)
+                + value(receive);
+
+    }
+
+    public List<SupplierDetailsDto> getSupplierDetails(
+            String username,
+            String supplierName,
+            LocalDate fromDate,
+            LocalDate toDate) {
+
+        // Opening balance
+        Double openingBalance = calculateOpeningBalance(username, supplierName, fromDate);
+
+        // Current period transactions
+        List<SupplierDetailsDto> purchases = productStockRepository
+                .findProductDetailsByUsernameAndSupplierName(username, supplierName, fromDate, toDate);
+
+        List<SupplierDetailsDto> returns = productStockRepository.findReturnedDetailsByUsernameAndSupplierName(username,
+                supplierName, fromDate, toDate);
+
+        List<SupplierDetailsDto> sales = productSaleRepository.findProductSalesByUsernameAndSupplierName(username,
+                supplierName, fromDate, toDate);
+
+        List<SupplierDetailsDto> payments = supplierPaymentRepository.findDetailsPaymentByUsernameAndSupplier(username,
+                supplierName, fromDate, toDate);
+
+        List<SupplierDetailsDto> receives = supplierPaymentRepository.findDetailsReceiveByUsernameAndSupplier(username,
+                supplierName, fromDate, toDate);
+
+        List<SupplierDetailsDto> list = new ArrayList<>();
+
+        list.addAll(purchases);
+        list.addAll(returns);
+        list.addAll(sales);
+        list.addAll(payments);
+        list.addAll(receives);
+
+        list.sort(Comparator
+                .comparing(SupplierDetailsDto::getDate)
+                .thenComparing(SupplierDetailsDto::getInvoice,
+                        Comparator.nullsLast(String::compareTo)));
+
+        double balance = openingBalance;
+
+        for (SupplierDetailsDto dto : list) {
+
+            dto.setOpeningBalance(balance);
+
+            balance += value(dto.getPvalue())
+                    - value(dto.getSvalue())
+                    - value(dto.getRvalue())
+                    - value(dto.getPayment())
+                    + value(dto.getReceive());
+
+            dto.setRunningBalance(balance);
+        }
+
+        return list;
+    }
+
+    private double value(Double value) {
+        return value == null ? 0 : value;
     }
 }

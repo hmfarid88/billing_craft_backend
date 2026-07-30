@@ -87,17 +87,34 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
                         "GROUP BY pr.paymentName")
         List<PayRecevBalance> findPayRecevSummaryBalances(@Param("username") String username);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, p.amount, 0.0) FROM PaymentRecord p WHERE p.paymentType='payment' AND p.username=:username AND p.paymentName=:paymentName ORDER BY p.date, p.id")
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, p.amount, 0.0, 0.0, 0.0) FROM PaymentRecord p WHERE p.paymentType='payment' AND p.username=:username AND p.paymentName=:paymentName AND p.date BETWEEN :fromDate AND :toDate ORDER BY p.date, p.id")
         List<PayRecevDetails> findPaymentsByUserAndPaymentName(@Param("username") String username,
-                        @Param("paymentName") String paymentName);
+                        @Param("paymentName") String paymentName, LocalDate fromDate, LocalDate toDate);
 
-        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, 0.0, p.amount) FROM PaymentRecord p WHERE p.paymentType='receive' AND p.username=:username AND p.paymentName=:paymentName ORDER BY p.date, p.id")
+        @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PayRecevDetails(p.date, p.paymentNote, 0.0, p.amount, 0.0, 0.0) FROM PaymentRecord p WHERE p.paymentType='receive' AND p.username=:username AND p.paymentName=:paymentName AND p.date BETWEEN :fromDate AND :toDate ORDER BY p.date, p.id")
         List<PayRecevDetails> findReceivesByUserAndPaymentName(@Param("username") String username,
-                        @Param("paymentName") String paymentName);
+                        @Param("paymentName") String paymentName, LocalDate fromDate, LocalDate toDate);
 
         @Query("SELECT e FROM PaymentRecord e WHERE e.username = :username AND e.date >= :startDate ORDER BY e.date DESC")
         List<PaymentRecord> findLast7DaysOfficePaymentByUsername(String username, LocalDate startDate);
 
         Optional<PaymentRecord> findByIdAndUsername(Long id, String username);
 
+        @Query("""
+                        SELECT COALESCE(SUM(p.amount),0)
+                        FROM PaymentRecord p
+                        WHERE p.paymentType='payment' AND p.username=:username
+                        AND p.paymentName=:paymentName
+                        AND p.date<:fromDate
+                        """)
+        Double sumPaymentBeforeDate(String username, String paymentName, LocalDate fromDate);
+
+        @Query("""
+                        SELECT COALESCE(SUM(p.amount),0)
+                        FROM PaymentRecord p
+                        WHERE p.paymentType='receive' AND p.username=:username
+                        AND p.paymentName=:paymentName
+                        AND p.date<:fromDate
+                        """)
+        Double sumReceiveBeforeDate(String username, String paymentName, LocalDate fromDate);
 }

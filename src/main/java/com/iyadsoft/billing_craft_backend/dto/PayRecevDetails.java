@@ -15,4 +15,7 @@ public class PayRecevDetails {
     private Double payment;
     private Double receive;
 
+    private Double openingBalance;
+    private Double balance;
+
 }

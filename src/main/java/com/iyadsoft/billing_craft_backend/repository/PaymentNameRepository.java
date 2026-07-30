@@ -11,5 +11,7 @@ public interface PaymentNameRepository extends JpaRepository<PaymentName, Long>{
     boolean existsByUsernameAndPaymentPerson(String username, String paymentPerson);
 
     List<PaymentName> getPaymentPersonByUsername(String username);
+
+    void deleteByUsernameAndPaymentPerson(String username, String paymentName);
     
 }

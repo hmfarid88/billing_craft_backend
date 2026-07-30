@@ -36,6 +36,8 @@ import com.iyadsoft.billing_craft_backend.service.PayRecevService;
 import com.iyadsoft.billing_craft_backend.service.SupplierBalanceService;
 import com.iyadsoft.billing_craft_backend.service.TransactionService;
 
+import jakarta.transaction.Transactional;
+
 @RestController
 @RequestMapping("/payment")
 public class PaymentController {
@@ -76,24 +78,21 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedName);
     }
 
-  @PostMapping("/addWalletName")
-   public ResponseEntity<?> addOrUpdateWalletName(@RequestBody WalletName walletName) {
-    WalletName existingWallet = walletNameRepository.findByUsernameAndWalletName(
-        walletName.getUsername(), walletName.getWalletName()
-    );
+    @PostMapping("/addWalletName")
+    public ResponseEntity<?> addOrUpdateWalletName(@RequestBody WalletName walletName) {
+        WalletName existingWallet = walletNameRepository.findByUsernameAndWalletName(
+                walletName.getUsername(), walletName.getWalletName());
 
-    WalletName savedWallet;
-    if (existingWallet != null) {
-        existingWallet.setRate(walletName.getRate()); 
-        savedWallet = walletNameRepository.save(existingWallet);
-        return ResponseEntity.ok(savedWallet);
-    } else {
-        savedWallet = walletNameRepository.save(walletName);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedWallet); 
+        WalletName savedWallet;
+        if (existingWallet != null) {
+            existingWallet.setRate(walletName.getRate());
+            savedWallet = walletNameRepository.save(existingWallet);
+            return ResponseEntity.ok(savedWallet);
+        } else {
+            savedWallet = walletNameRepository.save(walletName);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedWallet);
+        }
     }
-}
-
-
 
     @PostMapping("/expenseRecord")
     public Expense newExpense(@RequestBody Expense expense) {
@@ -157,7 +156,15 @@ public class PaymentController {
     @GetMapping("/getPaymentRecord-details")
     public List<PayRecevDetails> getPaymentRecordDetailsByUsername(@RequestParam String username,
             @RequestParam String paymentName) {
-        return payRecevService.getPaymentReceiveDetails(username, paymentName);
+        LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
+        LocalDate toDate = LocalDate.now();
+        return payRecevService.getPaymentReceiveDetails(username, paymentName, fromDate, toDate);
+    }
+
+    @GetMapping("/getDatewise-payrecev-details")
+    public List<PayRecevDetails> getDatewisePayRecevDetails(@RequestParam String username,
+            @RequestParam String paymentName, LocalDate fromDate, LocalDate toDate) {
+        return payRecevService.getPaymentReceiveDetails(username, paymentName, fromDate, toDate);
     }
 
     @GetMapping("/getSupplierBalance")
@@ -168,7 +175,15 @@ public class PaymentController {
     @GetMapping("/getSupplierBalance-details")
     public List<SupplierDetailsDto> getSupplierDetailsByUsername(@RequestParam String username,
             @RequestParam String supplierName) {
-        return supplierBalanceService.getSupplierDetails(username, supplierName);
+        LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
+        LocalDate toDate = LocalDate.now();
+        return supplierBalanceService.getSupplierDetails(username, supplierName, fromDate, toDate);
+    }
+
+    @GetMapping("/getDatewise-Supplier-details")
+    public List<SupplierDetailsDto> getDatewiseSupplierDetailsByUsername(@RequestParam String username,
+            @RequestParam String supplierName, LocalDate fromDate, LocalDate toDate) {
+        return supplierBalanceService.getSupplierDetails(username, supplierName, fromDate, toDate);
     }
 
     @GetMapping("/getMonthlyExpense")
@@ -322,6 +337,23 @@ public class PaymentController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Payment not found.");
         }
+    }
+    @Transactional
+    @DeleteMapping("/deletePaymentName")
+    public ResponseEntity<String> deletePaymentName(
+            @RequestParam String username,
+            @RequestParam String paymentName) {
+        paymentNameRepository.deleteByUsernameAndPaymentPerson(username, paymentName);
+        return ResponseEntity.ok("Name deleted successfully.");
+    }
+
+    @Transactional
+    @DeleteMapping("/deleteWalletName")
+    public ResponseEntity<String> deleteWalletName(
+            @RequestParam String username,
+            @RequestParam String waletName) {
+        walletNameRepository.deleteByUsernameAndWalletName(username, waletName);
+        return ResponseEntity.ok("Name deleted successfully.");
     }
 
 }

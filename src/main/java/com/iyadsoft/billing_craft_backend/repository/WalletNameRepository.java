@@ -13,4 +13,6 @@ public interface WalletNameRepository extends JpaRepository<WalletName, Long> {
 
     List<WalletName> getWalletNameByUsername(String username);
 
+    void deleteByUsernameAndWalletName(String username, String waletName);
+
 }

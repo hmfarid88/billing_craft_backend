@@ -25,17 +25,17 @@ public class TransactionService {
     private SupplierPaymentRepository supplierPaymentRepository;
 
     public List<Expense> getLast7DaysExpenses(String username) {
-        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6);
+        LocalDate sevenDaysAgo = LocalDate.now().minusDays(30);
         return expenseRepository.findLast7DaysExpensesByUsername(username, sevenDaysAgo);
     }
 
     public List<PaymentRecord> getLast7DaysOfficePayment(String username) {
-        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6);
+        LocalDate sevenDaysAgo = LocalDate.now().minusDays(30);
         return paymentRecordRepository.findLast7DaysOfficePaymentByUsername(username, sevenDaysAgo);
     }
 
     public List<SupplierPayment> getLast7DaysSupplierPayment(String username) {
-        LocalDate sevenDaysAgo = LocalDate.now().minusDays(6);
+        LocalDate sevenDaysAgo = LocalDate.now().minusDays(30);
         return supplierPaymentRepository.findLast7DaysSupplierPaymentByUsername(username, sevenDaysAgo);
     }
 }

@@ -1,5 +1,6 @@
 package com.iyadsoft.billing_craft_backend.controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,11 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.iyadsoft.billing_craft_backend.entity.Admin;
+import com.iyadsoft.billing_craft_backend.entity.BillStatus;
+import com.iyadsoft.billing_craft_backend.entity.UserBill;
 import com.iyadsoft.billing_craft_backend.entity.UserInfo;
 import com.iyadsoft.billing_craft_backend.repository.AdminRepository;
+import com.iyadsoft.billing_craft_backend.repository.UserBillRepository;
 import com.iyadsoft.billing_craft_backend.repository.UserInfoRepository;
+import com.iyadsoft.billing_craft_backend.service.MissingBill;
 import com.iyadsoft.billing_craft_backend.service.UserInfoService;
 
 @RestController
@@ -37,6 +43,12 @@ public class UserController {
 
     @Autowired
     private UserInfoService userInfoService;
+
+    @Autowired
+    private MissingBill missingBill;
+
+    @Autowired
+    private UserBillRepository userBillRepository;
 
     @PostMapping("/addNewUser")
     public ResponseEntity<?> addNewUser(@RequestBody UserInfo userInfo) {
@@ -93,21 +105,129 @@ public class UserController {
     }
 
     @GetMapping("/userLogin")
-    public ResponseEntity<Map<String, String>> getUserInfo(@RequestParam String username,
-            @RequestParam String password) {
-        UserInfo user = userInfoRepository.findByUsername(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "User found");
-            response.put("roles", user.getRoles());
-            response.put("status", user.getStatus());
-            return ResponseEntity.ok(response);
-        } else {
-            Map<String, String> error = new HashMap<>();
-            error.put("message", "Invalid credentials");
-            return ResponseEntity.status(401).body(error);
-        }
+    public ResponseEntity<Map<String, String>> getUserInfo(@RequestParam String
+    username, @RequestParam String password) {
+    UserInfo user = userInfoRepository.findByUsername(username);
+    if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+    Map<String, String> response = new HashMap<>();
+    response.put("roles", user.getRoles());
+    response.put("status", user.getStatus());
+    return ResponseEntity.ok(response);
+    } else {
+    Map<String, String> error = new HashMap<>();
+    error.put("message", "Sorry, login fail. Try again !");
+    return ResponseEntity.status(401).body(error);
     }
+    }
+
+    // @GetMapping("/userLogin")
+    // public ResponseEntity<Map<String, String>> getUserInfo(@RequestParam String
+    // username, @RequestParam String password) {
+    // UserInfo user = userInfoRepository.findByUsername(username);
+
+    // if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+    // // ✅ Generate missing bills if necessary
+    // missingBill.ensureMissingBills(user);
+
+    // Map<String, String> response = new HashMap<>();
+    // response.put("roles", user.getRoles());
+    // response.put("status", user.getStatus());
+    // return ResponseEntity.ok(response);
+    // } else {
+    // Map<String, String> error = new HashMap<>();
+    // error.put("message", "Sorry, login failed. Try again!");
+    // return ResponseEntity.status(401).body(error);
+    // }
+    // }
+
+    // @GetMapping("/userLogin")
+    // public ResponseEntity<Map<String, String>> getUserInfo(
+    //         @RequestParam String username,
+    //         @RequestParam String password) {
+
+    //     UserInfo user = userInfoRepository.findByUsername(username);
+    //     Map<String, String> response = new HashMap<>();
+
+    //     if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+    //         response.put("message", "Sorry, login failed. Try again!");
+    //         return ResponseEntity.status(401).body(response);
+    //     }
+
+    //     // 🔁 Step 1: Generate missing bills if any
+    //     missingBill.ensureMissingBills(user);
+
+    //     // 🔐 Step 2: Check if user is allowed to log in
+    //     List<UserBill> unpaidBills = userBillRepository.findByUsernameAndStatus(username, BillStatus.UNPAID);
+    //     long unpaidMonths = unpaidBills.stream()
+    //             .map(UserBill::getBillMonth)
+    //             .distinct()
+    //             .count();
+
+    //     if (unpaidMonths >= 1) {
+    //         double totalDue = unpaidBills.stream()
+    //                 .map(UserBill::getAmount)
+    //                 .mapToDouble(BigDecimal::doubleValue)
+    //                 .sum();
+
+    //         response.put("message", "Access suspended! You have unpaid bills.");
+    //         response.put("dueAmount", String.valueOf(totalDue));
+    //         response.put("redirectTo", "/payment-due");
+    //         return ResponseEntity.status(403).body(response);
+    //     }
+
+    //     // ✅ Allow login
+    //     response.put("roles", user.getRoles());
+    //     response.put("status", user.getStatus());
+    //     return ResponseEntity.ok(response);
+    // }
+
+    //updated
+//     @GetMapping("/userLogin")
+//     public ResponseEntity<Map<String, Object>> getUserInfo(
+//         @RequestParam String username,
+//         @RequestParam String password) {
+
+//     UserInfo user = userInfoRepository.findByUsername(username);
+//     Map<String, Object> response = new HashMap<>();
+
+//     // ❌ Invalid user
+//     if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+//         response.put("message", "Sorry, login failed. Try again!");
+//         return ResponseEntity.status(401).body(response);
+//     }
+
+//     // 🔥 CALL BILLING SERVICE API
+//     String billingUrl = "http://auth.iyadsoft.com/api/subscription/check?username=" + username;
+
+//     RestTemplate restTemplate = new RestTemplate();
+//     Map billingData;
+
+//     try {
+//         ResponseEntity<Map> billingResponse = restTemplate.getForEntity(billingUrl, Map.class);
+//         billingData = billingResponse.getBody();
+//     } catch (Exception e) {
+//         response.put("message", "Billing service not reachable!");
+//         return ResponseEntity.status(500).body(response);
+//     }
+
+//     String billingStatus = (String) billingData.get("status");
+
+//     // ❌ NOT PAID / EXPIRED
+//     if (!"ACTIVE".equalsIgnoreCase(billingStatus)) {
+
+//         response.put("message", "Access suspended! You have unpaid bills.");
+//         response.put("dueAmount", String.valueOf(billingData.get("dueAmount")));
+//         response.put("redirectTo", "/payment-due");
+
+//         return ResponseEntity.status(403).body(response);
+//     }
+
+//     // ✅ ALLOW LOGIN
+//     response.put("roles", user.getRoles());
+//     response.put("status", user.getStatus());
+
+//     return ResponseEntity.ok(response);
+// }
 
     @GetMapping("/user/userList")
     public List<UserInfo> getUsers() {

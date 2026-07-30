@@ -1,5 +1,8 @@
 package com.iyadsoft.billing_craft_backend.entity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Index;
@@ -29,4 +32,6 @@ public class UserInfo {
     private String password;
     private String roles;
     private String status;
+    private BigDecimal monthlyBill;
+    private LocalDate lastBilledMonth;
 }

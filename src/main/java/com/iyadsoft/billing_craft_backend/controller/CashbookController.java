@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto;
 import com.iyadsoft.billing_craft_backend.dto.PaymentDto;
 import com.iyadsoft.billing_craft_backend.dto.ReceiveDto;
+import com.iyadsoft.billing_craft_backend.dto.UserCashSummaryDTO;
 import com.iyadsoft.billing_craft_backend.repository.PaymentRecordRepository;
 import com.iyadsoft.billing_craft_backend.service.CashBookService;
 
@@ -57,5 +58,10 @@ public class CashbookController {
     @GetMapping("/sales/customer")
     public List<CashbookSaleDto> getCustomerSalesDetails(@RequestParam String username, @RequestParam LocalDate date) {
         return cashBookService.getCustomerSalesDetails(username, date);
+    }
+
+    @GetMapping("/groupCashSummary")
+    public List<UserCashSummaryDTO> getGroupCashSummary(@RequestParam String username) {
+        return cashBookService.getGroupCashSummary(username);
     }
 }

@@ -18,6 +18,7 @@ import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SalesItemDTO;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
 import com.iyadsoft.billing_craft_backend.dto.SixMonthAnalysis;
+import com.iyadsoft.billing_craft_backend.dto.UserSaleSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.Customer;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
@@ -140,5 +141,10 @@ public class ProductSaleService {
     public List<LossProfitAnalysis> getLastTwelveMonthsProfitLoss(String username) {
         LocalDate startDate = LocalDate.now().minusMonths(12);
         return productSaleRepository.findLastTwelveMonthsProfitLoss(username, startDate);
+    }
+
+    public List<UserSaleSummaryDTO> getGroupUserSaleSummary(String username, LocalDate fromDate, LocalDate toDate) {
+
+        return productSaleRepository.getGroupUserSaleSummary(username, fromDate, toDate);
     }
 }

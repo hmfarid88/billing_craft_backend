@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
+import com.iyadsoft.billing_craft_backend.dto.UserSaleSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.repository.ProductSaleRepository;
@@ -64,7 +65,7 @@ public class ProductSaleController {
 
     @PostMapping("/purchaseReturn")
     public ProductSale purchaseReturn(@RequestParam Long proId, @RequestParam String username) {
-                     
+
         ProductStock productStock = productStockRepository.findById(proId)
                 .orElseThrow(() -> new RuntimeException("ProductStock not found"));
         ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
@@ -116,5 +117,25 @@ public class ProductSaleController {
     public ResponseEntity<List<LossProfitAnalysis>> getLastTwelveMonthsProfitLoss(@RequestParam String username) {
         List<LossProfitAnalysis> profitLossData = productSaleService.getLastTwelveMonthsProfitLoss(username);
         return ResponseEntity.ok(profitLossData);
+    }
+
+    // Current Month
+    @GetMapping("/groupSaleSummaryCurrentMonth")
+    public List<UserSaleSummaryDTO> getCurrentMonthSummary(@RequestParam String username) {
+
+        LocalDate fromDate = LocalDate.now().withDayOfMonth(1);
+        LocalDate toDate = LocalDate.now();
+
+        return productSaleService.getGroupUserSaleSummary(username, fromDate, toDate);
+    }
+
+    // Custom Date Range
+    @GetMapping("/groupSaleSummaryDateWise")
+    public List<UserSaleSummaryDTO> getDateWiseSummary(
+            @RequestParam String username,
+            @RequestParam LocalDate fromDate,
+            @RequestParam LocalDate toDate) {
+
+        return productSaleService.getGroupUserSaleSummary(username, fromDate, toDate);
     }
 }

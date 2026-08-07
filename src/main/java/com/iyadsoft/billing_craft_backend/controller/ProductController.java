@@ -33,6 +33,7 @@ import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
 import com.iyadsoft.billing_craft_backend.dto.SaleReturnDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
+import com.iyadsoft.billing_craft_backend.dto.UserStockSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
@@ -101,7 +102,8 @@ public class ProductController {
         ZonedDateTime dhakaTime = ZonedDateTime.now(ZoneId.of("Asia/Dhaka"));
 
         for (ProductStock product : newProducts) {
-            if (productRepository.existsByUsernameAndProductnoNotInProductSale(product.getUsername(), product.getProductno())) {
+            if (productRepository.existsByUsernameAndProductnoNotInProductSale(product.getUsername(),
+                    product.getProductno())) {
                 throw new DuplicateEntityException("Product " + product.getProductno() + " is already exists!");
             }
             product.setTime(dhakaTime.toLocalTime());
@@ -113,7 +115,8 @@ public class ProductController {
     }
 
     @GetMapping("/product-stock/check")
-    public ResponseEntity<Map<String, Boolean>> checkProductNo(@RequestParam String username, @RequestParam String productno) {
+    public ResponseEntity<Map<String, Boolean>> checkProductNo(@RequestParam String username,
+            @RequestParam String productno) {
         boolean exists = productRepository.existsByUsernameAndProductnoNotInProductSale(username, productno);
         return ResponseEntity.ok(Collections.singletonMap("exists", exists));
     }
@@ -438,4 +441,9 @@ public class ProductController {
         return customerRepository.findCustomerVatSalesByUsername(username);
     }
 
+    @GetMapping("/getGroupUserStockSummary")
+    public List<UserStockSummaryDTO> getGroupUserStockSummary(@RequestParam String username) {
+
+        return productStockService.getGroupUserStockSummary(username);
+    }
 }

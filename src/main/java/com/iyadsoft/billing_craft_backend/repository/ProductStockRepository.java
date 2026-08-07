@@ -16,170 +16,194 @@ import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
 import com.iyadsoft.billing_craft_backend.dto.SaleReturnDto;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
 import com.iyadsoft.billing_craft_backend.dto.UpdateableStock;
+import com.iyadsoft.billing_craft_backend.dto.UserStockSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 
 @Repository
 public interface ProductStockRepository extends JpaRepository<ProductStock, Long> {
 
-       @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL")
-       List<ProductStock> getProductsStockByUsername(String username);
+    @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL")
+    List<ProductStock> getProductsStockByUsername(String username);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SaleReturnDto(ps.productStock.category, ps.productStock.brand, ps.productStock.productName, ps.productStock.color, ps.productStock.productno, ps.productStock.supplier, ps.productStock.supplierInvoice, ps.productStock.pprice, ps.productStock.sprice, ps.productStock.date, ps.productStock.time) "
-                     +
-                     "FROM ProductSale ps " +
-                     "JOIN ps.productStock p " +
-                     "WHERE ps.saleType = 'returned' AND ps.username = :username")
-       List<SaleReturnDto> getReturnedsStockByUsername(String username);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SaleReturnDto(ps.productStock.category, ps.productStock.brand, ps.productStock.productName, ps.productStock.color, ps.productStock.productno, ps.productStock.supplier, ps.productStock.supplierInvoice, ps.productStock.pprice, ps.productStock.sprice, ps.productStock.date, ps.productStock.time) "
+            +
+            "FROM ProductSale ps " +
+            "JOIN ps.productStock p " +
+            "WHERE ps.saleType = 'returned' AND ps.username = :username")
+    List<SaleReturnDto> getReturnedsStockByUsername(String username);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND MONTH(ps.date) = MONTH(CURRENT_DATE) AND YEAR(ps.date) = YEAR(CURRENT_DATE)")
-       List<ProductEntryDto> getProductsStockByUsernameForCurrentMonth(@Param("username") String username);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND MONTH(ps.date) = MONTH(CURRENT_DATE) AND YEAR(ps.date) = YEAR(CURRENT_DATE)")
+    List<ProductEntryDto> getProductsStockByUsernameForCurrentMonth(@Param("username") String username);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND ps.date BETWEEN :startDate AND :endDate")
-       List<ProductEntryDto> getDatewiseProductsStockByUsername(String username, LocalDate startDate,
-                     LocalDate endDate);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductEntryDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username=:username AND ps.date BETWEEN :startDate AND :endDate")
+    List<ProductEntryDto> getDatewiseProductsStockByUsername(String username, LocalDate startDate, LocalDate endDate);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.UpdateableStock(ps.supplier, ps.productName, ps.pprice, COUNT(ps.productno)) FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL GROUP BY ps.supplier, ps.productName, ps.pprice")
-       List<UpdateableStock> getProductsStockByUsernameAndSupplier(String username);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.UpdateableStock(ps.supplier, ps.productName, ps.pprice, COUNT(ps.productno)) FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND psale IS NULL GROUP BY ps.supplier, ps.productName, ps.pprice")
+    List<UpdateableStock> getProductsStockByUsernameAndSupplier(String username);
 
-       @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN TRUE ELSE FALSE END " +
-                     "FROM ProductStock ps " +
-                     "WHERE ps.username = :username " +
-                     "AND ps.productno = :productno " +
-                     "AND ps.proId NOT IN (SELECT psale.productStock.proId FROM ProductSale psale)")
-       boolean existsByUsernameAndProductnoNotInProductSale(String username, String productno);
+    @Query("SELECT CASE WHEN COUNT(ps) > 0 THEN TRUE ELSE FALSE END " +
+            "FROM ProductStock ps " +
+            "WHERE ps.username = :username " +
+            "AND ps.productno = :productno " +
+            "AND ps.proId NOT IN (SELECT psale.productStock.proId FROM ProductSale psale)")
+    boolean existsByUsernameAndProductnoNotInProductSale(String username, String productno);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
-                     "p.category, p.brand, p.productName, p.color, p.pprice, " +
-                     "SUM(CASE WHEN p.date < :today THEN 1 ELSE 0 END)-SUM(CASE WHEN p.date < :today AND ps.date < :today THEN 1 ELSE 0 END), "
-                     +
-                     "SUM(CASE WHEN p.date = :today THEN 1 ELSE 0 END), " +
-                     "SUM(CASE WHEN ps.date = :today THEN 1 ELSE 0 END)) " +
-                     "FROM ProductStock p " +
-                     "LEFT JOIN p.productSale ps " +
-                     "WHERE p.username = :username " +
-                     "GROUP BY p.category, p.brand, p.productName, p.color, p.pprice ORDER BY p.category, p.brand, p.productName, p.color")
-       List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName(
-                     @Param("username") String username,
-                     @Param("today") LocalDate today);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO(" +
+            "p.category, p.brand, p.productName, p.color, p.pprice, " +
+            "SUM(CASE WHEN p.date < :today THEN 1 ELSE 0 END)-SUM(CASE WHEN p.date < :today AND ps.date < :today THEN 1 ELSE 0 END), "
+            +
+            "SUM(CASE WHEN p.date = :today THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN ps.date = :today THEN 1 ELSE 0 END)) " +
+            "FROM ProductStock p " +
+            "LEFT JOIN p.productSale ps " +
+            "WHERE p.username = :username " +
+            "GROUP BY p.category, p.brand, p.productName, p.color, p.pprice ORDER BY p.category, p.brand, p.productName, p.color")
+    List<ProductStockCountDTO> countProductByUsernameGroupByCategoryBrandProductName(
+            @Param("username") String username,
+            @Param("today") LocalDate today);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PreviousStockDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username= :username AND ps.date <= :date AND ps.productno NOT IN ("
-                     +
-                     "SELECT psale.productStock.productno FROM ProductSale psale WHERE psale.username= :username AND psale.date <= :date)")
-       List<PreviousStockDto> findByDateBeforeAndProductNotInSale(@Param("username") String username,
-                     @Param("date") LocalDate date);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PreviousStockDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username= :username AND ps.date <= :date AND ps.productno NOT IN ("
+            +
+            "SELECT psale.productStock.productno FROM ProductSale psale WHERE psale.username= :username AND psale.date <= :date)")
+    List<PreviousStockDto> findByDateBeforeAndProductNotInSale(@Param("username") String username,
+            @Param("date") LocalDate date);
 
-       @Query(value = "SELECT DISTINCT ps.supplier AS supplierName " +
-                     "FROM product_stock ps " +
-                     "WHERE ps.username=:username AND ps.supplier IS NOT NULL " +
-                     "UNION " +
-                     "SELECT DISTINCT c.c_name AS supplierName " +
-                     "FROM customer c " +
-                     "JOIN product_sale psale ON psale.cid = c.cid " +
-                     "WHERE psale.username=:username AND psale.sale_type = 'vendor' AND c.c_name IS NOT NULL " +
-                     "UNION " +
-                     "SELECT DISTINCT sp.supplier_name AS supplierName " +
-                     "FROM supplier_payment sp " +
-                     "WHERE sp.username=:username AND sp.supplier_name IS NOT NULL", nativeQuery = true)
-       List<String> findAllDistinctSupplierNames(@Param("username") String username);
+    @Query(value = "SELECT DISTINCT ps.supplier AS supplierName " +
+            "FROM product_stock ps " +
+            "WHERE ps.username=:username AND ps.supplier IS NOT NULL " +
+            "UNION " +
+            "SELECT DISTINCT c.c_name AS supplierName " +
+            "FROM customer c " +
+            "JOIN product_sale psale ON psale.cid = c.cid " +
+            "WHERE psale.username=:username AND psale.sale_type = 'vendor' AND c.c_name IS NOT NULL " +
+            "UNION " +
+            "SELECT DISTINCT sp.supplier_name AS supplierName " +
+            "FROM supplier_payment sp " +
+            "WHERE sp.username=:username AND sp.supplier_name IS NOT NULL", nativeQuery = true)
+    List<String> findAllDistinctSupplierNames(@Param("username") String username);
 
-       @Query("SELECT SUM(COALESCE(ps.pprice, 0.0)) AS totalProductValue " +
-                     "FROM ProductStock ps " +
-                     "WHERE ps.username = :username AND ps.supplier = :supplier AND ps.proId NOT IN (" +
-                     "      SELECT psr.productStock.proId " +
-                     "      FROM ProductSale psr " +
-                     "      WHERE psr.saleType = 'returned'" +
-                     "  )")
-       Double findTotalProductValueByUsernameAndSupplier(@Param("username") String username,
-                     @Param("supplier") String supplier);
+    @Query("SELECT SUM(COALESCE(ps.pprice, 0.0)) AS totalProductValue " +
+            "FROM ProductStock ps " +
+            "WHERE ps.username = :username AND ps.supplier = :supplier AND ps.proId NOT IN (" +
+            "      SELECT psr.productStock.proId " +
+            "      FROM ProductSale psr " +
+            "      WHERE psr.saleType = 'returned'" +
+            "  )")
+    Double findTotalProductValueByUsernameAndSupplier(@Param("username") String username,
+            @Param("supplier") String supplier);
 
-       // @Query("SELECT new
-       // com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date,
-       // ps.supplierInvoice, COUNT(ps.productno), SUM(ps.pprice), 0.0, 0.0, 0.0, 'No')
-       // FROM ProductStock ps WHERE ps.username = :username AND ps.supplier =
-       // :supplierName AND ps.proId NOT IN (" +
-       // " SELECT psr.productStock.proId " +
-       // " FROM ProductSale psr " +
-       // " WHERE psr.saleType = 'returned' " +
-       // " ) GROUP BY ps.date, ps.supplierInvoice")
-       // List<SupplierDetailsDto> findProductDetailsByUsernameAndSupplierName(String
-       // username, String supplierName);
+    // @Query("SELECT new
+    // com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date,
+    // ps.supplierInvoice, COUNT(ps.productno), SUM(ps.pprice), 0.0, 0.0, 0.0, 'No')
+    // FROM ProductStock ps WHERE ps.username = :username AND ps.supplier =
+    // :supplierName AND ps.proId NOT IN (" +
+    // " SELECT psr.productStock.proId " +
+    // " FROM ProductSale psr " +
+    // " WHERE psr.saleType = 'returned' " +
+    // " ) GROUP BY ps.date, ps.supplierInvoice")
+    // List<SupplierDetailsDto> findProductDetailsByUsernameAndSupplierName(String
+    // username, String supplierName);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date, ps.supplierInvoice, COUNT(ps.productno), SUM(ps.pprice), 0.0, 0.0, 0.0, 0.0,'Stored', 0.0, 0.0) FROM ProductStock ps WHERE ps.username = :username AND ps.supplier = :supplierName AND ps.date BETWEEN :fromDate AND :toDate  GROUP BY ps.date, ps.supplierInvoice")
-       List<SupplierDetailsDto> findProductDetailsByUsernameAndSupplierName(String username, String supplierName,
-                     LocalDate fromDate, LocalDate toDate);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(ps.date, ps.supplierInvoice, COUNT(ps.productno), SUM(ps.pprice), 0.0, 0.0, 0.0, 0.0,'Stored', 0.0, 0.0) FROM ProductStock ps WHERE ps.username = :username AND ps.supplier = :supplierName AND ps.date BETWEEN :fromDate AND :toDate  GROUP BY ps.date, ps.supplierInvoice")
+    List<SupplierDetailsDto> findProductDetailsByUsernameAndSupplierName(String username, String supplierName,
+            LocalDate fromDate, LocalDate toDate);
 
-       @Query("""
-                     SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(
-                         ps.date,
-                         ps.productStock.productno,
-                         1L,
-                         0.0,
-                         0.0,
-                         ps.productStock.pprice,
-                         0.0,
-                         0.0,
-                         'Returned', 0.0, 0.0
-                     )
-                     FROM ProductSale ps
-                     WHERE ps.username = :username
-                     AND ps.productStock.supplier = :supplierName AND ps.date BETWEEN :fromDate AND :toDate
-                     AND ps.saleType = 'returned'
-                     ORDER BY ps.date
-                     """)
-       List<SupplierDetailsDto> findReturnedDetailsByUsernameAndSupplierName(
-                     @Param("username") String username,
-                     @Param("supplierName") String supplierName,
-                     @Param("fromDate") LocalDate fromDate,
-                     @Param("toDate") LocalDate toDate);
+    @Query("""
+            SELECT new com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto(
+                ps.date,
+                ps.productStock.productno,
+                1L,
+                0.0,
+                0.0,
+                ps.productStock.pprice,
+                0.0,
+                0.0,
+                'Returned', 0.0, 0.0
+            )
+            FROM ProductSale ps
+            WHERE ps.username = :username
+            AND ps.productStock.supplier = :supplierName AND ps.date BETWEEN :fromDate AND :toDate
+            AND ps.saleType = 'returned'
+            ORDER BY ps.date
+            """)
+    List<SupplierDetailsDto> findReturnedDetailsByUsernameAndSupplierName(
+            @Param("username") String username,
+            @Param("supplierName") String supplierName,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate);
 
-       @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND ps.supplier=:supplier AND ps.productName=:productName AND ps.pprice=:pprice AND psale IS NULL")
-       List<ProductStock> findByUsernameAndSupplierAndProductNameAndPprice(String username, String supplier,
-                     String productName, Double pprice);
+    @Query("SELECT ps FROM ProductStock ps LEFT JOIN ps.productSale psale WHERE ps.username=:username AND ps.supplier=:supplier AND ps.productName=:productName AND ps.pprice=:pprice AND psale IS NULL")
+    List<ProductStock> findByUsernameAndSupplierAndProductNameAndPprice(String username, String supplier,
+            String productName, Double pprice);
 
-       @Query("SELECT ps FROM ProductStock ps WHERE ps.username = :username AND ps.productno = :productno AND ps.proId NOT IN (SELECT DISTINCT ps.proId FROM ProductSale psale JOIN psale.productStock ps)")
-       List<ProductStock> findProductsNotInSalesStock(@Param("username") String username,
-                     @Param("productno") String productno);
+    @Query("SELECT ps FROM ProductStock ps WHERE ps.username = :username AND ps.productno = :productno AND ps.proId NOT IN (SELECT DISTINCT ps.proId FROM ProductSale psale JOIN psale.productStock ps)")
+    List<ProductStock> findProductsNotInSalesStock(@Param("username") String username,
+            @Param("productno") String productno);
 
-       @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO( " +
-                     "ps.category, ps.brand, ps.productName, ps.productno, ps.color, ps.pprice, ps.sprice, ps.supplier, ps.supplierInvoice, ps.date, ps.time, "
-                     +
-                     "CASE WHEN psale IS NOT NULL THEN 'sold' ELSE 'stored' END, " +
-                     "psale.saleType, psale.sprice, psale.discount, psale.offer, psale.date, psale.time, c.cid, c.cName, c.phoneNumber, c.soldby) "
-                     +
-                     "FROM ProductStock ps " +
-                     "LEFT JOIN ProductSale psale ON ps.proId = psale.productStock.proId " +
-                     "LEFT JOIN Customer c ON psale.customer.cid = c.cid " +
-                     "WHERE ps.username = :username AND ps.productno = :productno")
-       List<ProductDetailDTO> findAllProductOccurrences(@Param("username") String username,
-                     @Param("productno") String productno);
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO( " +
+            "ps.category, ps.brand, ps.productName, ps.productno, ps.color, ps.pprice, ps.sprice, ps.supplier, ps.supplierInvoice, ps.date, ps.time, "
+            +
+            "CASE WHEN psale IS NOT NULL THEN 'sold' ELSE 'stored' END, " +
+            "psale.saleType, psale.sprice, psale.discount, psale.offer, psale.date, psale.time, c.cid, c.cName, c.phoneNumber, c.soldby) "
+            +
+            "FROM ProductStock ps " +
+            "LEFT JOIN ProductSale psale ON ps.proId = psale.productStock.proId " +
+            "LEFT JOIN Customer c ON psale.customer.cid = c.cid " +
+            "WHERE ps.username = :username AND ps.productno = :productno")
+    List<ProductDetailDTO> findAllProductOccurrences(@Param("username") String username,
+            @Param("productno") String productno);
 
-       boolean existsByUsernameAndProductnoAndProIdNot(String username, String productno, Long proId);
+    boolean existsByUsernameAndProductnoAndProIdNot(String username, String productno, Long proId);
 
-       Optional<ProductStock> findTopByUsernameAndBrandAndProductNameOrderByProIdDesc(String username, String brand,
-                     String productName);
+    Optional<ProductStock> findTopByUsernameAndBrandAndProductNameOrderByProIdDesc(String username, String brand,
+            String productName);
 
-       @Query("""
-                     SELECT COALESCE(SUM(ps.pprice),0)
-                     FROM ProductStock ps
-                     WHERE ps.username=:username
-                     AND ps.supplier=:supplierName
-                     AND ps.date<:fromDate
-                     """)
-       Double sumPurchaseBeforeDate(
-                     String username,
-                     String supplierName,
-                     LocalDate fromDate);
+    @Query("""
+            SELECT COALESCE(SUM(ps.pprice),0)
+            FROM ProductStock ps
+            WHERE ps.username=:username
+            AND ps.supplier=:supplierName
+            AND ps.date<:fromDate
+            """)
+    Double sumPurchaseBeforeDate(
+            String username,
+            String supplierName,
+            LocalDate fromDate);
 
-       @Query("""
-                     SELECT COALESCE(SUM(ps.productStock.pprice),0)
-                     FROM ProductSale ps
-                     WHERE ps.username=:username
-                     AND ps.productStock.supplier=:supplierName
-                     AND ps.saleType='returned'
-                     AND ps.date<:fromDate
-                     """)
-       Double sumReturnedBeforeDate(
-                     String username,
-                     String supplierName,
-                     LocalDate fromDate);
+    @Query("""
+            SELECT COALESCE(SUM(ps.productStock.pprice),0)
+            FROM ProductSale ps
+            WHERE ps.username=:username
+            AND ps.productStock.supplier=:supplierName
+            AND ps.saleType='returned'
+            AND ps.date<:fromDate
+            """)
+    Double sumReturnedBeforeDate(
+            String username,
+            String supplierName,
+            LocalDate fromDate);
+
+    @Query("""
+            SELECT new com.iyadsoft.billing_craft_backend.dto.UserStockSummaryDTO(
+                ps.username,
+                COUNT(DISTINCT ps.productno),
+                COALESCE(SUM(ps.pprice), 0)
+            )
+            FROM ProductStock ps
+            LEFT JOIN ps.productSale psale
+            WHERE psale IS NULL
+            AND ps.username IN (
+                SELECT u.username
+                FROM UserInfo u
+                WHERE u.ownerGroup = (
+                    SELECT t.ownerGroup
+                    FROM UserInfo t
+                    WHERE t.username = :username
+                )
+            )
+            GROUP BY ps.username
+            ORDER BY ps.username
+            """)
+    List<UserStockSummaryDTO> getGroupUserStockSummary(@Param("username") String username);
+    
 }

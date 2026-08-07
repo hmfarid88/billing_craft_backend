@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.iyadsoft.billing_craft_backend.controller.DuplicateEntityException;
 import com.iyadsoft.billing_craft_backend.dto.ProductDetailDTO;
 import com.iyadsoft.billing_craft_backend.dto.ProductStockCountDTO;
+import com.iyadsoft.billing_craft_backend.dto.UserStockSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.Pricedrop;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.repository.ProductStockRepository;
@@ -121,4 +122,8 @@ public class ProductStockService {
     public List<ProductDetailDTO> getAllProductOccurrences(String username, String productno) {
         return productStockRepository.findAllProductOccurrences(username, productno);
     }
+
+    public List<UserStockSummaryDTO> getGroupUserStockSummary(String username) {
+    return productStockRepository.getGroupUserStockSummary(username);
+}
 }

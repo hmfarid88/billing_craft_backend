@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 import com.iyadsoft.billing_craft_backend.dto.CashbookSaleDto;
 import com.iyadsoft.billing_craft_backend.dto.PaymentDto;
 import com.iyadsoft.billing_craft_backend.dto.ReceiveDto;
+import com.iyadsoft.billing_craft_backend.dto.UserCashSummaryDTO;
 import com.iyadsoft.billing_craft_backend.repository.ExpenseRepository;
 import com.iyadsoft.billing_craft_backend.repository.PaymentRecordRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductSaleRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProfitWithdrawRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierPaymentRepository;
+import com.iyadsoft.billing_craft_backend.repository.UserInfoRepository;
 
 @Service
 public class CashBookService {
@@ -29,6 +31,7 @@ public class CashBookService {
 
     private final ProductSaleRepository productSaleRepository;
 
+    
     @Autowired
     public CashBookService(ProductSaleRepository productSaleRepository, ExpenseRepository expenseRepository,
             PaymentRecordRepository paymentRecordRepository, SupplierPaymentRepository supplierPaymentRepository,
@@ -38,6 +41,7 @@ public class CashBookService {
         this.paymentRecordRepository = paymentRecordRepository;
         this.supplierPaymentRepository = supplierPaymentRepository;
         this.profitWithdrawRepository = profitWithdrawRepository;
+    
     }
 
     public List<PaymentDto> getPaymentsForToday(String username, LocalDate date) {
@@ -66,5 +70,14 @@ public class CashBookService {
 
     public List<CashbookSaleDto> getCustomerSalesDetails(String username, LocalDate date) {
         return productSaleRepository.findCustomerSalesDetails(username, date);
+    }
+
+    public List<UserCashSummaryDTO> getGroupCashSummary(String username) {
+        List<Object[]> results = paymentRecordRepository.findGroupCashSummary(username);
+        return results.stream()
+                .map(row -> new UserCashSummaryDTO(
+                        (String) row[0],
+                        ((Number) row[1]).doubleValue()))
+                .toList();
     }
 }

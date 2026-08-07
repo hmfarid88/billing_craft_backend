@@ -17,6 +17,7 @@ import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.ProfitItemDto;
 import com.iyadsoft.billing_craft_backend.dto.SixMonthAnalysis;
 import com.iyadsoft.billing_craft_backend.dto.SupplierDetailsDto;
+import com.iyadsoft.billing_craft_backend.dto.UserSaleSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
 
 @Repository
@@ -169,4 +170,30 @@ public interface ProductSaleRepository extends JpaRepository<ProductSale, Long> 
                      @Param("supplierName") String supplierName,
                      @Param("fromDate") LocalDate fromDate);
 
+       @Query("""
+                     SELECT new com.iyadsoft.billing_craft_backend.dto.UserSaleSummaryDTO(
+                         ps.username,
+                         COUNT(ps.saleId),
+                         COALESCE(SUM(ps.sprice),0),
+                         COALESCE(SUM(ps.productStock.pprice),0),
+                         COALESCE(SUM(ps.sprice - ps.productStock.pprice),0)
+                     )
+                     FROM ProductSale ps
+                     WHERE ps.username IN (
+                         SELECT u.username
+                         FROM UserInfo u
+                         WHERE u.ownerGroup = (
+                             SELECT t.ownerGroup
+                             FROM UserInfo t
+                             WHERE t.username = :username
+                         )
+                     )
+                     AND ps.date BETWEEN :fromDate AND :toDate
+                     GROUP BY ps.username
+                     ORDER BY ps.username
+                     """)
+       List<UserSaleSummaryDTO> getGroupUserSaleSummary(
+                     @Param("username") String username,
+                     @Param("fromDate") LocalDate fromDate,
+                     @Param("toDate") LocalDate toDate);
 }

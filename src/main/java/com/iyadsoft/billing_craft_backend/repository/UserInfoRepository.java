@@ -24,4 +24,16 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, Integer> {
     @Modifying
     @Query("UPDATE UserInfo u SET u.password = :password WHERE u.username = :username")
     int updatePasswordByUsername(@Param("username") String username, @Param("password") String password);
+
+    @Query("""
+    SELECT u
+    FROM UserInfo u
+    WHERE u.ownerGroup = (
+        SELECT t.ownerGroup
+        FROM UserInfo t
+        WHERE t.username = :username
+    )
+    ORDER BY u.username ASC
+""")
+List<UserInfo> findUsersBySameOwnerGroup(@Param("username") String username);
 }

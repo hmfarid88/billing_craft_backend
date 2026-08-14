@@ -62,11 +62,10 @@ public interface ProductStockRepository extends JpaRepository<ProductStock, Long
             @Param("username") String username,
             @Param("today") LocalDate today);
 
-    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PreviousStockDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username= :username AND ps.date <= :date AND ps.productno NOT IN ("
+    @Query("SELECT new com.iyadsoft.billing_craft_backend.dto.PreviousStockDto(ps.category, ps.brand, ps.productName, ps.pprice, ps.sprice, ps.color, ps.supplier, ps.supplierInvoice, ps.productno, ps.date, ps.time) FROM ProductStock ps WHERE ps.username= :username AND ps.date <= :date AND ps.proId NOT IN ("
             +
-            "SELECT psale.productStock.productno FROM ProductSale psale WHERE psale.username= :username AND psale.date <= :date)")
-    List<PreviousStockDto> findByDateBeforeAndProductNotInSale(@Param("username") String username,
-            @Param("date") LocalDate date);
+            "SELECT psale.productStock.proId FROM ProductSale psale WHERE psale.username= :username AND psale.date <= :date)")
+    List<PreviousStockDto> findByDateBeforeAndProductNotInSale(@Param("username") String username, @Param("date") LocalDate date);
 
     @Query(value = "SELECT DISTINCT ps.supplier AS supplierName " +
             "FROM product_stock ps " +

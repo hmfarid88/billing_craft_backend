@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
+import com.iyadsoft.billing_craft_backend.dto.SaleEditDTO;
+import com.iyadsoft.billing_craft_backend.dto.SaleInfoEditDTO;
 import com.iyadsoft.billing_craft_backend.dto.SalesItemDTO;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
 import com.iyadsoft.billing_craft_backend.dto.SixMonthAnalysis;
@@ -61,13 +63,11 @@ public class ProductSaleService {
                     .orElseThrow(
                             () -> new RuntimeException("ProductStock not found for proId: " + salesItemDTO.getProId()));
 
-                            totalValue += (
-                                (salesItemDTO.getSprice() != null ? salesItemDTO.getSprice() : 0.0) +
-                                (customer.getVatAmount() != null ? customer.getVatAmount() : 0.0) -
-                                (salesItemDTO.getDiscount() != null ? salesItemDTO.getDiscount() : 0.0) -
-                                (salesItemDTO.getOffer() != null ? salesItemDTO.getOffer() : 0.0)
-                            );
-                            
+            totalValue += ((salesItemDTO.getSprice() != null ? salesItemDTO.getSprice() : 0.0) +
+                    (customer.getVatAmount() != null ? customer.getVatAmount() : 0.0) -
+                    (salesItemDTO.getDiscount() != null ? salesItemDTO.getDiscount() : 0.0) -
+                    (salesItemDTO.getOffer() != null ? salesItemDTO.getOffer() : 0.0));
+
             // Create ProductSale and set fields
             ProductSale productSale = new ProductSale();
             productSale.setCustomer(savedCustomer); // Associate with saved customer
@@ -146,5 +146,78 @@ public class ProductSaleService {
     public List<UserSaleSummaryDTO> getGroupUserSaleSummary(String username, LocalDate fromDate, LocalDate toDate) {
 
         return productSaleRepository.getGroupUserSaleSummary(username, fromDate, toDate);
+    }
+
+    public List<ProductSale> findSalesByUsernameAndProductno(
+            String username,
+            String productno) {
+
+        return productSaleRepository
+                .findByUsernameAndProductStock_Productno(username, productno);
+    }
+
+    @Transactional
+    public void deleteSaleAndCustomerById(Long saleId) {
+
+        ProductSale sale = productSaleRepository.findById(saleId)
+                .orElseThrow(() -> new IllegalArgumentException("Sale not found."));
+
+        // Your existing deletion logic here
+
+        productSaleRepository.delete(sale);
+    }
+
+    public List<SaleInfoEditDTO> getSalesByCid(String cid) {
+
+        return productSaleRepository.findByCustomer_Cid(cid)
+                .stream()
+                .map(sale -> new SaleInfoEditDTO(
+                        sale.getSaleId(),
+                        sale.getSaleType(),
+                        sale.getSprice(),
+                        sale.getDiscount(),
+                        sale.getOffer(),
+                        sale.getDate()
+                ))
+                .toList();
+    }
+
+
+    @Transactional
+    public List<SaleInfoEditDTO> updateSales(String cid,
+            List<SaleInfoEditDTO> dtoList) {
+
+        List<ProductSale> sales =
+                productSaleRepository.findByCustomer_Cid(cid);
+
+        for (SaleInfoEditDTO dto : dtoList) {
+
+            ProductSale sale = sales.stream()
+                    .filter(s -> s.getSaleId()
+                            .equals(dto.getSaleId()))
+                    .findFirst()
+                    .orElseThrow(() ->
+                            new RuntimeException(
+                                    "Sale not found: "
+                                            + dto.getSaleId()
+                            ));
+
+            // ONLY update these fields
+
+            sale.setSaleType(dto.getSaleType());
+
+            sale.setSprice(dto.getSprice());
+
+            sale.setDiscount(dto.getDiscount());
+
+            sale.setOffer(dto.getOffer());
+
+            sale.setDate(dto.getDate());
+
+        }
+
+        productSaleRepository.saveAll(sales);
+
+        return getSalesByCid(cid);
     }
 }

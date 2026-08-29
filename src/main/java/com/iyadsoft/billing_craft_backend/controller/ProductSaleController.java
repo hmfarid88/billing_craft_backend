@@ -13,13 +13,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.iyadsoft.billing_craft_backend.dto.LossProfitAnalysis;
+import com.iyadsoft.billing_craft_backend.dto.SaleEditDTO;
+import com.iyadsoft.billing_craft_backend.dto.SaleInfoEditDTO;
 import com.iyadsoft.billing_craft_backend.dto.SalesRequest;
 import com.iyadsoft.billing_craft_backend.dto.UserSaleSummaryDTO;
 import com.iyadsoft.billing_craft_backend.entity.ProductSale;
@@ -83,13 +87,163 @@ public class ProductSaleController {
 
     }
 
+    // @DeleteMapping("/saleReturn")
+    // public ResponseEntity<Object> deleteSaleAndCustomer(@RequestParam String
+    // username, @RequestParam String productno) {
+    // try {
+    // productSaleService.deleteSaleAndCustomer(username, productno);
+    // return ResponseEntity.ok(Map.of("message", "Sale deleted successfully."));
+    // } catch (IllegalArgumentException e) {
+    // return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    // .body(Map.of("message", "An error occurred."));
+    // }
+    // }
+
+    // @DeleteMapping("/saleReturn")
+    // public ResponseEntity<Object> deleteSaleAndCustomer(
+    // @RequestParam String username,
+    // @RequestParam String productno) {
+
+    // try {
+    // List<ProductSale> sales =
+    // productSaleService.findSalesByUsernameAndProductno(username, productno);
+
+    // if (sales.isEmpty()) {
+    // return ResponseEntity.status(HttpStatus.NOT_FOUND)
+    // .body(Map.of("message", "No sale found."));
+    // }
+
+    // // Only one record found
+    // if (sales.size() == 1) {
+    // productSaleService.deleteSaleAndCustomerById(sales.get(0).getSaleId());
+
+    // return ResponseEntity.ok(
+    // Map.of("message", "Sale deleted successfully."));
+    // }
+
+    // // Multiple records found
+    // return ResponseEntity.ok(
+    // Map.of(
+    // "multiple", true,
+    // "message", "Multiple sales found. Please select one.",
+    // "sales", sales));
+
+    // } catch (IllegalArgumentException e) {
+    // return ResponseEntity.badRequest()
+    // .body(Map.of("message", e.getMessage()));
+
+    // } catch (Exception e) {
+    // return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    // .body(Map.of("message", "An error occurred."));
+    // }
+    // }
+
     @DeleteMapping("/saleReturn")
-    public ResponseEntity<Object> deleteSaleAndCustomer(@RequestParam String username, @RequestParam String productno) {
+    public ResponseEntity<Object> deleteSaleAndCustomer(
+            @RequestParam String username,
+            @RequestParam String productno) {
+
         try {
-            productSaleService.deleteSaleAndCustomer(username, productno);
-            return ResponseEntity.ok(Map.of("message", "Sale deleted successfully."));
+
+            List<ProductSale> sales = productSaleService.findSalesByUsernameAndProductno(
+                    username,
+                    productno);
+
+            if (sales.isEmpty()) {
+
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of(
+                                "message",
+                                "No sale found for this product."));
+            }
+
+            // Only one sale
+            if (sales.size() == 1) {
+
+                Long saleId = sales.get(0).getSaleId();
+
+                productSaleService.deleteSaleAndCustomerById(saleId);
+
+                return ResponseEntity.ok(
+                        Map.of(
+                                "multiple",
+                                false,
+                                "message",
+                                "Sale deleted successfully."));
+            }
+
+            // Multiple sales
+            List<SaleEditDTO> result = sales.stream()
+                    .map(sale -> {
+
+                        ProductStock stock = sale.getProductStock();
+
+                        return new SaleEditDTO(
+                                sale.getSaleId(),
+
+                                stock != null
+                                        ? stock.getProductno()
+                                        : null,
+
+                                stock != null
+                                        ? stock.getProductName()
+                                        : null,
+
+                                sale.getDate(),
+                                sale.getTime(),
+                                sale.getSaleType(),
+                                sale.getSprice(),
+                                sale.getDiscount(),
+                                sale.getOffer());
+                    })
+                    .toList();
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "multiple",
+                            true,
+
+                            "message",
+                            "Multiple sales found. Please select one.",
+
+                            "sales",
+                            result));
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
+            return ResponseEntity.badRequest()
+                    .body(Map.of(
+                            "message",
+                            e.getMessage()));
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return ResponseEntity.status(
+                    HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            Map.of(
+                                    "message",
+                                    "An error occurred: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/saleReturn/{saleId}")
+    public ResponseEntity<Object> deleteSaleReturn(
+            @PathVariable Long saleId) {
+
+        try {
+            productSaleService.deleteSaleAndCustomerById(saleId);
+
+            return ResponseEntity.ok(
+                    Map.of("message", "Sale deleted successfully."));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "An error occurred."));
@@ -137,5 +291,25 @@ public class ProductSaleController {
             @RequestParam LocalDate toDate) {
 
         return productSaleService.getGroupUserSaleSummary(username, fromDate, toDate);
+    }
+
+     @GetMapping("/findSaleEdit/{cid}")
+    public ResponseEntity<List<SaleInfoEditDTO>> getSalesForEdit(
+            @PathVariable String cid) {
+
+        return ResponseEntity.ok(
+                productSaleService.getSalesByCid(cid)
+        );
+    }
+
+
+    @PutMapping("/updateSaleInfo/{cid}")
+    public ResponseEntity<List<SaleInfoEditDTO>> updateSales(
+            @PathVariable String cid,
+            @RequestBody List<SaleInfoEditDTO> sales) {
+
+        return ResponseEntity.ok(
+                productSaleService.updateSales(cid, sales)
+        );
     }
 }

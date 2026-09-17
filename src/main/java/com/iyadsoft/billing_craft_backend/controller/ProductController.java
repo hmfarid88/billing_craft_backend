@@ -38,6 +38,7 @@ import com.iyadsoft.billing_craft_backend.entity.BrandName;
 import com.iyadsoft.billing_craft_backend.entity.CategoryName;
 import com.iyadsoft.billing_craft_backend.entity.ColorName;
 import com.iyadsoft.billing_craft_backend.entity.Currency;
+import com.iyadsoft.billing_craft_backend.entity.DataShow;
 import com.iyadsoft.billing_craft_backend.entity.Pricedrop;
 import com.iyadsoft.billing_craft_backend.entity.ProductStock;
 import com.iyadsoft.billing_craft_backend.entity.ProductName;
@@ -52,6 +53,7 @@ import com.iyadsoft.billing_craft_backend.repository.ProductStockRepository;
 import com.iyadsoft.billing_craft_backend.repository.ProductSaleRepository;
 import com.iyadsoft.billing_craft_backend.repository.SupplierNameRepository;
 import com.iyadsoft.billing_craft_backend.service.CurrencyService;
+import com.iyadsoft.billing_craft_backend.service.DataShowService;
 import com.iyadsoft.billing_craft_backend.service.ProductStockService;
 import com.iyadsoft.billing_craft_backend.service.VatService;
 
@@ -76,6 +78,9 @@ public class ProductController {
 
     @Autowired
     private VatService vatService;
+
+    @Autowired
+    private DataShowService dataShowService;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -301,9 +306,19 @@ public class ProductController {
         return vatService.saveOrUpdateVat(vat);
     }
 
+    @PutMapping("/dataShowEntry")
+    public DataShow saveOrUpdateDataShow(@RequestBody DataShow dataShow) {
+        return dataShowService.saveOrUpdateVat(dataShow);
+    }
+
     @GetMapping("/getVatPercent")
     public Optional<Double> getPercentByUsername(@RequestParam String username) {
         return vatService.getPercentByUsername(username);
+    }
+
+    @GetMapping("/getDataPercent")
+    public Optional<Double> getDataPercentByUsername(@RequestParam String username) {
+        return dataShowService.getPercentByUsername(username);
     }
 
     @PostMapping("/update-pricedrop")
